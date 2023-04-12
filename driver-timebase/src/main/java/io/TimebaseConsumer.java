@@ -13,5 +13,4 @@
  */
 package io.openmessaging.benchmark.driver.timebase;
 
-public class TimeBaseConsumer extends DefaultConsumer implements BenchmarkConsumer {
-}
+public class TimeBaseConsumer extends DefaultConsumer implements BenchmarkConsumer {}

@@ -1,0 +1,58 @@
+---
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+- name: Apply tuned profile
+  command: >
+    tuned-adm profile latency-performance
+- name: Format first NVME disk
+  filesystem:
+      fstype: xfs
+      dev: '{{ item }}'
+  with_items:
+    - '/dev/nvme1n1'
+- name: Mount first NVME disk
+  mount:
+    path: "{{ item.path }}"
+    src: "{{ item.src }}"
+    fstype: xfs
+    opts: defaults,noatime,nodiscard
+    state: mounted
+  with_items:
+    - { path: "{{ timebase_dir }}", src: "/dev/nvme1n1" }
+- name: Increase hard file descriptor limit
+  pam_limits:
+    domain: '*'
+    limit_type: 'hard'
+    limit_item: nofile
+    value: 500000
+- name: Increase soft file descriptor limit
+  pam_limits:
+    domain: '*'
+    limit_type: 'soft'
+    limit_item: nofile
+    value: 500000
+- name: Enable pam_limits.so
+  lineinfile:
+    path: /etc/pam.d/login
+    insertafter: EOF
+    line: 'session required pam_limits.so'
+- name: set vm.max_map_count
+  sysctl:
+    name: vm.max_map_count
+    value: '262144'
+    state: present
+    reload: yes
+- name: Reboot the machine with all defaults
+  reboot:

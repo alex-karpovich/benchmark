@@ -1,0 +1,49 @@
+---
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+- name: Create Timebase directory
+  file:
+    state: directory
+    path: "{{ timebase_dir }}/timebase-home/config"
+
+- name: Generate Docker compose file
+  template:
+    src: "docker-compose.yml.j2"
+    dest: "{{ timebase_dir }}/docker-compose.yml"
+
+- name: Generate Timebase admin.properties file
+  template:
+    src: "admin.properites.j2"
+    dest: "{{ timebase_dir }}/timebase-home/config/admin.properties" 
+
+- name: Set files permissions
+  file:
+    name: "{{ timebase_dir }}/timebase-home"
+    owner: "{{ deltix_uid }}"
+    group: "{{ deltix_gid }}"
+    state: directory
+    recurse: true
+
+- name: Login to Deltix registry
+  docker_login:
+    registry: "{{ deltix_registry_url }}"
+    username: "{{ deltix_registry_user }}"
+    password: "{{ deltix_registry_pass }}"
+
+- name: Run Docker compose
+  docker_compose:
+    project_src: "{{ timebase_dir }}"
+    pull: true
+    recreate: always

@@ -13,6 +13,4 @@
  */
 package io.openmessaging.benchmark.driver.timebase;
 
-public class TimeBaseDriver implements BenchmarkDriver {
-
-}
+public class TimeBaseDriver implements BenchmarkDriver {}

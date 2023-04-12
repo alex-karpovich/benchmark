@@ -24,7 +24,43 @@
     </parent>
     <artifactId>driver-timebase</artifactId>
 
+    <distributionManagement>
+        <snapshotRepository>
+            <id>artifact-registry</id>
+            <url>https://nexus.deltixhub.com/repository/epm-rtc-java/</url>
+        </snapshotRepository>
+        <repository>
+            <id>artifact-registry</id>
+            <url>https://nexus.deltixhub.com/repository/epm-rtc-java/</url>
+        </repository>
+    </distributionManagement>
+
+    <repositories>
+        <repository>
+            <id>artifact-registry</id>
+            <url>https://nexus.deltixhub.com/repository/epm-rtc-java/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
     <dependencies>
 
+        <dependency>
+            <groupId>io.openmessaging.benchmark</groupId>
+            <artifactId>driver-api</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>deltix.qsrv.timebase</groupId>
+            <artifactId>deltix-timebase-client</artifactId>
+            <version>7.1.22</version>
+        </dependency>
     </dependencies>
 </project>

@@ -30,5 +30,7 @@ services:
         -XX:HeapDumpPath=/timebase-home/timebase.hprof
         -Xlog:gc=debug:file=/timebase-home/GClog-TimeBase.log:time,uptime,level,tags:filecount=5,filesize=100m
     network_mode: host
+    extra_hosts:
+      - "{{ hostvars[inventory_hostname]['ansible_fqdn'] }}:{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
     volumes:
       - "./timebase-home:/timebase-home"

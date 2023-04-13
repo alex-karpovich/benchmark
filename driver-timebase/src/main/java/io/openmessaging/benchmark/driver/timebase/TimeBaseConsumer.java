@@ -20,7 +20,6 @@ import io.openmessaging.benchmark.driver.BenchmarkConsumer;
 import io.openmessaging.benchmark.driver.ConsumerCallback;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,30 +28,32 @@ public class TimeBaseConsumer implements BenchmarkConsumer {
     private static final Logger LOGGER = LoggerFactory.getLogger(TimeBaseConsumer.class);
 
     private final TickCursor cursor;
-    private final ConsumerCallback callback;
 
     private final ExecutorService executor;
-
-    private final Future<?> consumerTask;
 
     private volatile boolean closing = false;
 
     public TimeBaseConsumer(TickCursor cursor, ConsumerCallback callback) {
         this.cursor = cursor;
-        this.callback = callback;
 
         this.executor = Executors.newSingleThreadExecutor();
 
-        this.consumerTask =
-                this.executor.submit(
-                        () -> {
-                            LOGGER.info("Consumer {} started reading messages", cursor);
-                            while (!closing && cursor.next()) {
-                                RawMessage message = (RawMessage) cursor.getMessage();
-                                callback.messageReceived(message.data, message.getTimeStampMs());
-                            }
-                            LOGGER.info("Consumer {} stopped reading messages", cursor);
-                        });
+        this.executor.submit(
+                () -> {
+                    LOGGER.info("Consumer {} started reading messages", cursor);
+                    cursor.reset(Long.MIN_VALUE);
+                    cursor.subscribeToAllTypes();
+                    cursor.subscribeToAllEntities();
+                    try {
+                        while (!closing && cursor.next()) {
+                            RawMessage message = (RawMessage) cursor.getMessage();
+                            callback.messageReceived(message.data, message.getTimeStampMs());
+                        }
+                    } catch (Exception e) {
+                        LOGGER.error("Error occurred while reading message by consumer {}", cursor);
+                    }
+                    LOGGER.info("Consumer {} stopped reading messages", cursor);
+                });
     }
 
     @Override
@@ -61,5 +62,6 @@ public class TimeBaseConsumer implements BenchmarkConsumer {
         if (cursor != null) {
             cursor.close();
         }
+        executor.shutdown();
     }
 }

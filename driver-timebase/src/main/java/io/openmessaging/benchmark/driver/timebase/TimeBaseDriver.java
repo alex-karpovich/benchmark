@@ -25,6 +25,7 @@ import deltix.qsrv.hf.pub.md.RecordClassDescriptor;
 import deltix.qsrv.hf.spi.conn.DisconnectEventListener;
 import deltix.qsrv.hf.spi.conn.Disconnectable;
 import deltix.qsrv.hf.tickdb.pub.DXTickDB;
+import deltix.qsrv.hf.tickdb.pub.DXTickStream;
 import deltix.qsrv.hf.tickdb.pub.LoadingOptions;
 import deltix.qsrv.hf.tickdb.pub.SelectionOptions;
 import deltix.qsrv.hf.tickdb.pub.StreamOptions;
@@ -188,7 +189,8 @@ public class TimeBaseDriver implements BenchmarkDriver {
         LoadingOptions loadingOptions = LoadingOptions.withAppendMode(true);
         int count = topicConfig.getProducerCount();
         loadingOptions.space = PARTITION_PREFIX + count;
-        MessageChannel loader = getOrCreate().getStream(topic).createLoader(loadingOptions);
+        DXTickStream stream = getOrCreate().getStream(topic);
+        MessageChannel loader = stream.createLoader(loadingOptions);
         TimeBaseProducer producer = new TimeBaseProducer(loader);
         return CompletableFuture.completedFuture(producer);
     }
@@ -200,7 +202,8 @@ public class TimeBaseDriver implements BenchmarkDriver {
                 subscriptionName,
                 (key) -> {
                     SelectionOptions selectionOptions = new SelectionOptions(true, true);
-                    TickCursor cursor = getOrCreate().getStream(topic).createCursor(selectionOptions);
+                    DXTickStream stream = getOrCreate().getStream(topic);
+                    TickCursor cursor = stream.createCursor(selectionOptions);
                     TimeBaseConsumer timeBaseConsumer = new TimeBaseConsumer(cursor, consumerCallback);
                     return CompletableFuture.completedFuture(timeBaseConsumer);
                 });

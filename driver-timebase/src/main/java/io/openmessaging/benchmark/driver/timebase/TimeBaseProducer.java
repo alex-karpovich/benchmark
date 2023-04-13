@@ -28,7 +28,7 @@ public class TimeBaseProducer implements BenchmarkProducer {
     private static final Logger LOGGER = LoggerFactory.getLogger(TimeBaseProducer.class);
 
     private final MessageChannel loader;
-    private final RawMessage message = new RawMessage();
+    private final RawMessage message = new RawMessage(TimeBaseDriver.messageDescriptor);
 
     public TimeBaseProducer(MessageChannel loader) {
         this.loader = loader;
@@ -46,7 +46,6 @@ public class TimeBaseProducer implements BenchmarkProducer {
             loader.send(message);
             future.complete(null);
         } catch (Exception ex) {
-            LOGGER.error("Error on sending message", ex);
             future.completeExceptionally(ex);
         }
 

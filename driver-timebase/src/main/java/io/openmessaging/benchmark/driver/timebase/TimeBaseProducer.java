@@ -23,7 +23,7 @@ import java.util.concurrent.CompletableFuture;
 public class TimeBaseProducer implements BenchmarkProducer {
 
     private final MessageChannel loader;
-    private final RawMessage message = new RawMessage();
+    private final RawMessage message = new RawMessage(TimeBaseDriver.messageDescriptor);
 
     public TimeBaseProducer(MessageChannel loader) {
         this.loader = loader;

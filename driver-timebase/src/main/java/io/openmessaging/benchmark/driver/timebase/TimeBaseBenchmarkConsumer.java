@@ -13,5 +13,10 @@
  */
 package io.openmessaging.benchmark.driver.timebase;
 
-public class TimeBaseConsumer extends DefaultConsumer implements BenchmarkConsumer {
+
+import io.openmessaging.benchmark.driver.BenchmarkConsumer;
+
+public class TimeBaseBenchmarkConsumer implements BenchmarkConsumer {
+    @Override
+    public void close() throws Exception {}
 }

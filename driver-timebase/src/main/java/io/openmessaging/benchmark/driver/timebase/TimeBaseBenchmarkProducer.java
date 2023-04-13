@@ -13,6 +13,17 @@
  */
 package io.openmessaging.benchmark.driver.timebase;
 
-public class TimeBaseDriver implements BenchmarkDriver {
 
+import io.openmessaging.benchmark.driver.BenchmarkProducer;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+
+public class TimeBaseBenchmarkProducer implements BenchmarkProducer {
+    @Override
+    public CompletableFuture<Void> sendAsync(Optional<String> key, byte[] payload) {
+        return null;
+    }
+
+    @Override
+    public void close() throws Exception {}
 }

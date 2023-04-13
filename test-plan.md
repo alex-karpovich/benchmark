@@ -15,6 +15,7 @@ Notes:
 ### Kafka
 
 Run the benchmark command:
+
 ```
 sudo bin/benchmark \
 --drivers driver-kafka/kafka-latency.yaml \
@@ -25,12 +26,13 @@ Important notes
 
 - Default Kafka partitioner is used. Sticky partitioning strategy is applied for nullable keys. See details [here](https://www.confluent.io/blog/apache-kafka-producer-improvements-sticky-partitioner/)
 
-
 ### Timebase
 
 Run the benchmark command:
+
 ```
 sudo bin/benchmark \
 --drivers driver-timebase/timebase-latency.yaml \
 workloads/1-topic-16-partition-256b.yaml
 ```
+

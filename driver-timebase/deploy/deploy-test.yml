@@ -22,6 +22,7 @@
         timeout: 300
     - setup: {}
   roles:
+    - tuned
     - chrony
     - benchmark-client
 
@@ -35,6 +36,7 @@
     - setup: {}
   roles:
     - system
+    - tuned
     - chrony
     - docker
     - timebase

@@ -14,9 +14,9 @@
 
 TimeBase.host={{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}
 TimeBase.port=8011
-TimeBase.cluster.memberKey=member{{ groups['zookeeper'].index(inventory_hostname) + 1 }}
+TimeBase.cluster.memberKey=member{{ groups['timebase'].index(inventory_hostname) + 1 }}
 TimeBase.cluster.memberAddress={{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:7081
-TimeBase.cluster.allServers={{ groups['timebase'] | map('extract', hostvars, ['private_ip']) | map('regex_replace', '^(.*)$', '\\1:7081') | join(',') }}
+TimeBase.cluster.allServers={{ groups['timebase'] | map('extract', hostvars, ['ansible_default_ipv4', 'address']) | map('regex_replace', '^(.*)$', '\\1:7081') | join(',') }}
 TimeBase.cluster.group=tbcluster
 TimeBase.cluster.enabled=true
 TimeBase.cluster.stream.replicationFactor=2

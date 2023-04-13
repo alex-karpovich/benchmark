@@ -13,46 +13,56 @@
 # limitations under the License.
 #
 
-- name: Apply tuned profile
-  command: >
-    tuned-adm profile latency-performance
-- name: Format first NVME disk
-  filesystem:
+- name: Check if the first NVME device is mounted
+  shell: "mount -l | grep nvme1n1 -c || true"
+  register: mount_status
+
+- name: Mount the first NVME device (if not mounted)
+  block:
+  - name: Format the first NVME disk
+    filesystem:
+        fstype: xfs
+        dev: '{{ item }}'
+    with_items:
+      - '/dev/nvme1n1'
+
+  - name: Mount the first NVME disk
+    mount:
+      path: "{{ item.path }}"
+      src: "{{ item.src }}"
       fstype: xfs
-      dev: '{{ item }}'
-  with_items:
-    - '/dev/nvme1n1'
-- name: Mount first NVME disk
-  mount:
-    path: "{{ item.path }}"
-    src: "{{ item.src }}"
-    fstype: xfs
-    opts: defaults,noatime,nodiscard
-    state: mounted
-  with_items:
-    - { path: "{{ timebase_dir }}", src: "/dev/nvme1n1" }
+      opts: defaults,noatime,nodiscard
+      state: mounted
+    with_items:
+      - { path: "{{ timebase_dir }}", src: "/dev/nvme1n1" }
+  when: mount_status.stdout == '0'
+
 - name: Increase hard file descriptor limit
   pam_limits:
     domain: '*'
     limit_type: 'hard'
     limit_item: nofile
     value: 500000
+
 - name: Increase soft file descriptor limit
   pam_limits:
     domain: '*'
     limit_type: 'soft'
     limit_item: nofile
     value: 500000
+
 - name: Enable pam_limits.so
   lineinfile:
     path: /etc/pam.d/login
     insertafter: EOF
     line: 'session required pam_limits.so'
-- name: set vm.max_map_count
+
+- name: Set vm.max_map_count
   sysctl:
     name: vm.max_map_count
     value: '262144'
     state: present
     reload: yes
+
 - name: Reboot the machine with all defaults
   reboot:

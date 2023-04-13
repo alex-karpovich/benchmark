@@ -1,3 +1,4 @@
+---
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,8 +13,16 @@
 # limitations under the License.
 #
 
+- name: Install tuned package
+  command: "yum install -y tuned"
+  args:
+      creates: /usr/sbin/tuned
 
-workers:
-{% for worker in groups['client'] %}
-  - http://{{ hostvars[worker].ansible_default_ipv4.address }}:8080
-{% endfor %}
+- name: Start and enable tuned service
+  systemd:
+    state: restarted
+    daemon_reload: yes
+    name: tuned
+
+- name: Apply tuned profile 
+  shell: tuned-adm profile latency-performance

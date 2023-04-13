@@ -25,7 +25,7 @@
 
 - name: Generate Timebase admin.properties file
   template:
-    src: "admin.properites.j2"
+    src: "admin.properties.j2"
     dest: "{{ timebase_dir }}/timebase-home/config/admin.properties" 
 
 - name: Set files permissions

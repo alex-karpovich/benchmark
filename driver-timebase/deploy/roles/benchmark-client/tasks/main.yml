@@ -13,48 +13,16 @@
 # limitations under the License.
 #
 
-- name: Apply tuned profile 
-  shell: tuned-adm profile latency-performance
-
 - name: Delete existing benchmark directory
   file: path=/opt/benchmark state=absent
 
 - name: Copy benchmark code
   unarchive:
-    src: ../../../package/target/openmessaging-benchmark-0.0.1-SNAPSHOT-bin.tar.gz
+    src: ../../package/target/openmessaging-benchmark-0.0.1-SNAPSHOT-bin.tar.gz
     dest: /opt
 
 - name: Rename benchmark directory
   shell: mv /opt/openmessaging-benchmark-0.0.1-SNAPSHOT /opt/benchmark
-
-- name: Get list of driver config files
-  raw: ls -1 /opt/benchmark/driver-kafka/*.yaml
-  register: drivers_list
-
-- name: Configure Bootstrap Servers
-  lineinfile:
-      dest: '{{ item }}'
-      regexp: '^  bootstrap.servers='
-      line: '  bootstrap.servers={{ bootstrapServers }}'
-  with_items: '{{ drivers_list.stdout_lines }}'
-
-- name: Get list of jms driver config files
-  raw: ls -1 /opt/benchmark/driver-jms/kafka*.yaml
-  register: jms_drivers_list
-
-- name: Configure JMS Bootstrap Servers
-  lineinfile:
-      dest: '{{ item }}'
-      regexp: '^  bootstrap.servers='
-      line: '  bootstrap.servers={{ bootstrapServers }}'
-  with_items: '{{ jms_drivers_list.stdout_lines }}'
-
-- name: Configure JMS Connection Factory
-  ansible.builtin.replace:
-      dest: '{{ item }}'
-      regexp: 'localhost\:9092'
-      replace: '{{ bootstrapServers }}'
-  with_items: '{{ jms_drivers_list.stdout_lines }}'
 
 - name: Configure benchmark worker memory
   lineinfile:

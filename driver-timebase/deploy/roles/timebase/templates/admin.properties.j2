@@ -1,0 +1,23 @@
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+TimeBase.host={{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}
+TimeBase.port=8011
+TimeBase.cluster.memberKey=member{{ groups['zookeeper'].index(inventory_hostname) + 1 }}
+TimeBase.cluster.memberAddress={{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:7081
+TimeBase.cluster.allServers={{ groups['timebase'] | map('extract', hostvars, ['private_ip']) | map('regex_replace', '^(.*)$', '\\1:7081') | join(',') }}
+TimeBase.cluster.group=tbcluster
+TimeBase.cluster.enabled=true
+TimeBase.cluster.stream.replicationFactor=2
+TimeBase.cluster.blockAllocatorType=MEMBER_KEY

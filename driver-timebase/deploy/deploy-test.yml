@@ -1,3 +1,4 @@
+---
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,15 +13,28 @@
 # limitations under the License.
 #
 
-name: 1 producer / 1 consumers on 1 topic
+- hosts: client
+  gather_facts: true
+  remote_user: ec2-user
+  pre_tasks:
+    - include_vars: ./defaults/main.yml
+    - wait_for_connection:
+        timeout: 300
+    - setup: {}
+  roles:
+    - chrony
+    - benchmark-client
 
-topics: 1
-partitionsPerTopic: 16
-messageSize: 256
-payloadFile: "payload/payload-256b.data"
-subscriptionsPerTopic: 1
-consumerPerSubscription: 1
-producersPerTopic: 1
-producerRate: 10000
-consumerBacklogSizeGB: 0
-testDurationMinutes: 15
+- hosts: timebase
+  gather_facts: true
+  remote_user: ec2-user
+  pre_tasks:
+    - include_vars: ./defaults/main.yml
+    - wait_for_connection:
+        timeout: 300
+    - setup: {}
+  roles:
+    - system
+    - chrony
+    - docker
+    - timebase

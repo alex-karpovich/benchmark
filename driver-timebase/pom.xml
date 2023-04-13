@@ -38,6 +38,18 @@
     <dependencies>
 
         <dependency>
+            <groupId>deltix.qsrv</groupId>
+            <artifactId>deltix-timebase-api-messages</artifactId>
+            <version>5.6.25</version>
+        </dependency>
+
+        <dependency>
+            <groupId>deltix.qsrv.timebase</groupId>
+            <artifactId>deltix-timebase-api</artifactId>
+            <version>7.1.22</version>
+        </dependency>
+
+        <dependency>
             <groupId>deltix.qsrv.timebase</groupId>
             <artifactId>deltix-timebase-client</artifactId>
             <version>7.1.22</version>

@@ -13,17 +13,11 @@
  */
 package io.openmessaging.benchmark.driver.timebase;
 
+public class TimeBaseConfig {
 
-import io.openmessaging.benchmark.driver.BenchmarkProducer;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
+    public String connectionUrl;
 
-public class TimeBaseBenchmarkProducer implements BenchmarkProducer {
-    @Override
-    public CompletableFuture<Void> sendAsync(Optional<String> key, byte[] payload) {
-        return null;
-    }
+    public String user;
 
-    @Override
-    public void close() throws Exception {}
+    public String password;
 }

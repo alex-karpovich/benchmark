@@ -20,4 +20,6 @@ public class TimeBaseConfig {
     public String user;
 
     public String password;
+
+    public int replicationFactor;
 }

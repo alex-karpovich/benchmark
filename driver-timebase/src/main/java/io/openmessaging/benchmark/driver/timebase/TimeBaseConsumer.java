@@ -21,8 +21,12 @@ import io.openmessaging.benchmark.driver.ConsumerCallback;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TimeBaseConsumer implements BenchmarkConsumer {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TimeBaseConsumer.class);
 
     private final TickCursor cursor;
     private final ConsumerCallback callback;
@@ -42,10 +46,12 @@ public class TimeBaseConsumer implements BenchmarkConsumer {
         this.consumerTask =
                 this.executor.submit(
                         () -> {
+                            LOGGER.info("Consumer {} started reading messages", cursor);
                             while (!closing && cursor.next()) {
                                 RawMessage message = (RawMessage) cursor.getMessage();
                                 callback.messageReceived(message.data, message.getTimeStampMs());
                             }
+                            LOGGER.info("Consumer {} stopped reading messages", cursor);
                         });
     }
 

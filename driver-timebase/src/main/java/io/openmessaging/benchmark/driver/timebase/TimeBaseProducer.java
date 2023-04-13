@@ -15,12 +15,17 @@ package io.openmessaging.benchmark.driver.timebase;
 
 
 import deltix.data.stream.MessageChannel;
+import deltix.qsrv.hf.pub.InstrumentType;
 import deltix.qsrv.hf.pub.RawMessage;
 import io.openmessaging.benchmark.driver.BenchmarkProducer;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TimeBaseProducer implements BenchmarkProducer {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TimeBaseProducer.class);
 
     private final MessageChannel loader;
     private final RawMessage message = new RawMessage();
@@ -36,10 +41,12 @@ public class TimeBaseProducer implements BenchmarkProducer {
 
         try {
             message.data = payload;
-            message.setSymbol(key.orElse(""));
+            message.setSymbol("TEST");
+            message.setInstrumentType(InstrumentType.EQUITY);
             loader.send(message);
             future.complete(null);
         } catch (Exception ex) {
+            LOGGER.error("Error on sending message", ex);
             future.completeExceptionally(ex);
         }
 

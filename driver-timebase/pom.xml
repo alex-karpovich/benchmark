@@ -46,13 +46,13 @@
         <dependency>
             <groupId>deltix.qsrv.timebase</groupId>
             <artifactId>deltix-timebase-api</artifactId>
-            <version>7.1.22</version>
+            <version>7.2.7</version>
         </dependency>
 
         <dependency>
             <groupId>deltix.qsrv.timebase</groupId>
             <artifactId>deltix-timebase-client</artifactId>
-            <version>7.1.22</version>
+            <version>7.2.7</version>
         </dependency>
 
         <dependency>

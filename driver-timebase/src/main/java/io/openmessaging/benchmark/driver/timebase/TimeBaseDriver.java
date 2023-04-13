@@ -148,7 +148,7 @@ public class TimeBaseDriver implements BenchmarkDriver {
 
     @Override
     public CompletableFuture<BenchmarkProducer> createProducer(String topic) {
-        MessageChannel loader = getOrCreate().getStream(topic).createLoader(new LoadingOptions(false));
+        MessageChannel loader = getOrCreate().getStream(topic).createLoader(new LoadingOptions(true));
         return CompletableFuture.completedFuture(new TimeBaseProducer(loader));
     }
 

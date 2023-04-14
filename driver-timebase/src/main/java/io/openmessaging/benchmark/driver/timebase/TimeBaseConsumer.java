@@ -14,6 +14,9 @@
 package io.openmessaging.benchmark.driver.timebase;
 
 
+import deltix.qsrv.hf.pub.InstrumentMessage;
+import deltix.qsrv.hf.pub.RawMessage;
+import deltix.qsrv.hf.pub.md.RecordClassDescriptor;
 import deltix.qsrv.hf.tickdb.pub.TickCursor;
 import io.openmessaging.benchmark.driver.BenchmarkConsumer;
 import io.openmessaging.benchmark.driver.ConsumerCallback;
@@ -32,7 +35,7 @@ public class TimeBaseConsumer implements BenchmarkConsumer {
 
     private volatile boolean closing = false;
 
-    public TimeBaseConsumer(TickCursor cursor, ConsumerCallback callback) {
+    public TimeBaseConsumer(TickCursor cursor, ConsumerCallback callback, boolean raw) {
         this.cursor = cursor;
 
         this.executor = Executors.newSingleThreadExecutor();
@@ -45,12 +48,21 @@ public class TimeBaseConsumer implements BenchmarkConsumer {
                     cursor.subscribeToAllEntities();
                     try {
                         while (!closing && cursor.next()) {
-                            BinaryPayloadMessage message = (BinaryPayloadMessage) cursor.getMessage();
-                            callback.messageReceived(
-                                    message.getPayload().getInternalBuffer(), message.getTimeStampMs());
+                            InstrumentMessage cursorMessage = cursor.getMessage();
+
+                            byte[] payloadData;
+                            if (raw) {
+                                RawMessage rawMessage = (RawMessage) cursorMessage;
+                                payloadData = rawMessage.data;
+                            } else {
+                                BinaryPayloadMessage payloadMessage = (BinaryPayloadMessage) cursorMessage;
+                                payloadData = payloadMessage.getPayload().getInternalBuffer();
+                            }
+
+                            callback.messageReceived(payloadData, cursorMessage.getTimeStampMs());
                         }
                     } catch (Exception e) {
-                        LOGGER.error("Error occurred while reading message by consumer {}: {}", cursor, e);
+                        LOGGER.error("Error occurred while reading message by consumer {}", cursor, e);
                     }
                     LOGGER.info("Consumer {} stopped reading messages", cursor);
                 });

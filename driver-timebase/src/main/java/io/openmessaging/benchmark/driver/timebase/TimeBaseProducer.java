@@ -15,7 +15,10 @@ package io.openmessaging.benchmark.driver.timebase;
 
 
 import deltix.data.stream.MessageChannel;
+import deltix.qsrv.hf.pub.InstrumentMessage;
 import deltix.qsrv.hf.pub.InstrumentType;
+import deltix.qsrv.hf.pub.RawMessage;
+import deltix.qsrv.hf.pub.md.RecordClassDescriptor;
 import deltix.util.collections.generated.ByteArrayList;
 import io.openmessaging.benchmark.driver.BenchmarkProducer;
 import java.util.Optional;
@@ -28,14 +31,24 @@ public class TimeBaseProducer implements BenchmarkProducer {
     private static final Logger LOGGER = LoggerFactory.getLogger(TimeBaseProducer.class);
 
     private final MessageChannel loader;
-    private final BinaryPayloadMessage message;
+    private final boolean raw;
+    private final InstrumentMessage message;
 
-    public TimeBaseProducer(MessageChannel loader) {
+    public TimeBaseProducer(MessageChannel loader, boolean raw, RecordClassDescriptor messageDescriptor) {
         this.loader = loader;
-        message = new BinaryPayloadMessage();
+        this.raw = raw;
+
+        if (raw) {
+            RawMessage rawMessage = new RawMessage(messageDescriptor);
+            message = rawMessage;
+        } else {
+            BinaryPayloadMessage binaryMessage = new BinaryPayloadMessage();
+            binaryMessage.setPayload(new ByteArrayList());
+            message = binaryMessage;
+        }
+
         message.setSymbol("TEST");
         message.setInstrumentType(InstrumentType.EQUITY);
-        message.setPayload(new ByteArrayList());
     }
 
     @Override
@@ -43,9 +56,15 @@ public class TimeBaseProducer implements BenchmarkProducer {
 
         CompletableFuture<Void> future = new CompletableFuture<>();
 
-        ByteArrayList arr = message.getPayload();
-        arr.clear();
-        arr.addAll(payload, 0, payload.length);
+        if (raw) {
+            RawMessage rawMessage = (RawMessage) message;
+            rawMessage.data = payload;
+        } else {
+            BinaryPayloadMessage binaryMessage = (BinaryPayloadMessage) message;
+            ByteArrayList arr = binaryMessage.getPayload();
+            arr.clear();
+            arr.addAll(payload, 0, payload.length);
+        }
 
         long now = System.currentTimeMillis();
         message.setTimeStampMs(now);
@@ -54,7 +73,7 @@ public class TimeBaseProducer implements BenchmarkProducer {
             loader.send(message);
             future.complete(null);
         } catch (Exception ex) {
-            LOGGER.error("Error on sending message: {}", ex);
+            LOGGER.error("Error on sending message", ex);
             future.completeExceptionally(ex);
         }
 

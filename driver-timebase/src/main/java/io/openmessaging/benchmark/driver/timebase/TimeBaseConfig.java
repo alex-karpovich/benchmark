@@ -22,4 +22,6 @@ public class TimeBaseConfig {
     public String password;
 
     public int replicationFactor;
+
+    public boolean raw = true;
 }

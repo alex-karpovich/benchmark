@@ -55,6 +55,7 @@ public class TimeBaseDriver implements BenchmarkDriver {
     private static final String PARTITION_PREFIX = "p_";
 
     private static final ChannelPerformance CHANNEL_PERFORMANCE = LOW_LATENCY;
+    private static final boolean RAW = true;
 
     private DXTickDB client;
     private TimeBaseConfig config;
@@ -69,7 +70,7 @@ public class TimeBaseDriver implements BenchmarkDriver {
                     .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     private static final RecordClassDescriptor messageDescriptor =
-            getDescriptorForInstrumentMessage();
+            getBinaryPayloadMessageDescriptor();
 
     private class ProducerSupplier {
         private final int partitionCount;
@@ -168,7 +169,7 @@ public class TimeBaseDriver implements BenchmarkDriver {
                 });
     }
 
-    private static RecordClassDescriptor getDescriptorForInstrumentMessage() {
+    private static RecordClassDescriptor getBinaryPayloadMessageDescriptor() {
         Introspector ix = Introspector.createEmptyMessageIntrospector();
         try {
             return ix.introspectRecordClass("Get test RD", BinaryPayloadMessage.class);
@@ -188,12 +189,12 @@ public class TimeBaseDriver implements BenchmarkDriver {
 
     private CompletableFuture<BenchmarkProducer> createProducer(
             String streamKey, String partitionKey) {
-        LoadingOptions loadingOptions = LoadingOptions.withAppendMode(false);
+        LoadingOptions loadingOptions = LoadingOptions.withAppendMode(config.raw);
         loadingOptions.channelPerformance = CHANNEL_PERFORMANCE;
         loadingOptions.space = partitionKey;
         DXTickStream stream = getOrCreate().getStream(streamKey);
         MessageChannel loader = stream.createLoader(loadingOptions);
-        TimeBaseProducer producer = new TimeBaseProducer(loader);
+        TimeBaseProducer producer = new TimeBaseProducer(loader, RAW, messageDescriptor);
         return CompletableFuture.completedFuture(producer);
     }
 
@@ -203,11 +204,12 @@ public class TimeBaseDriver implements BenchmarkDriver {
         return subscriptionToConsumer.computeIfAbsent(
                 subscriptionName,
                 (key) -> {
-                    SelectionOptions selectionOptions = new SelectionOptions(false, true);
+                    SelectionOptions selectionOptions = new SelectionOptions(config.raw, true);
                     selectionOptions.channelPerformance = CHANNEL_PERFORMANCE;
                     DXTickStream stream = getOrCreate().getStream(topic);
                     TickCursor cursor = stream.createCursor(selectionOptions);
-                    TimeBaseConsumer timeBaseConsumer = new TimeBaseConsumer(cursor, consumerCallback);
+                    TimeBaseConsumer timeBaseConsumer =
+                            new TimeBaseConsumer(cursor, consumerCallback, config.raw);
                     return CompletableFuture.completedFuture(timeBaseConsumer);
                 });
     }

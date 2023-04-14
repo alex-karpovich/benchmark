@@ -24,10 +24,6 @@
     </parent>
     <artifactId>driver-timebase</artifactId>
 
-    <properties>
-        <timebase.version>7.2.8</timebase.version>
-    </properties>
-
     <distributionManagement>
         <repository>
             <id>artifact-registry</id>
@@ -39,7 +35,16 @@
         </snapshotRepository>
     </distributionManagement>
 
+    <properties>
+        <timebase.version>7.2.8</timebase.version>
+    </properties>
+
     <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>driver-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>deltix.qsrv</groupId>
             <artifactId>deltix-timebase-api-messages</artifactId>
@@ -54,11 +59,6 @@
             <groupId>deltix.qsrv.timebase</groupId>
             <artifactId>deltix-timebase-client</artifactId>
             <version>${timebase.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>driver-api</artifactId>
-            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

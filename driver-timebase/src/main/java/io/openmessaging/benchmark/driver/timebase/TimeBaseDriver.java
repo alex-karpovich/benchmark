@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import deltix.data.stream.MessageChannel;
+import deltix.qsrv.hf.pub.ChannelPerformance;
 import deltix.qsrv.hf.pub.md.Introspector;
 import deltix.qsrv.hf.pub.md.RecordClassDescriptor;
 import deltix.qsrv.hf.spi.conn.DisconnectEventListener;
@@ -48,9 +49,12 @@ import org.apache.bookkeeper.stats.StatsLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("unused")
 public class TimeBaseDriver implements BenchmarkDriver {
 
     private static final String PARTITION_PREFIX = "p_";
+
+    private static final ChannelPerformance CHANNEL_PERFORMANCE = LOW_LATENCY;
 
     private DXTickDB client;
     private TimeBaseConfig config;
@@ -185,7 +189,7 @@ public class TimeBaseDriver implements BenchmarkDriver {
     private CompletableFuture<BenchmarkProducer> createProducer(
             String streamKey, String partitionKey) {
         LoadingOptions loadingOptions = LoadingOptions.withAppendMode(false);
-        loadingOptions.channelPerformance = LOW_LATENCY;
+        loadingOptions.channelPerformance = CHANNEL_PERFORMANCE;
         loadingOptions.space = partitionKey;
         DXTickStream stream = getOrCreate().getStream(streamKey);
         MessageChannel loader = stream.createLoader(loadingOptions);
@@ -200,6 +204,7 @@ public class TimeBaseDriver implements BenchmarkDriver {
                 subscriptionName,
                 (key) -> {
                     SelectionOptions selectionOptions = new SelectionOptions(false, true);
+                    selectionOptions.channelPerformance = CHANNEL_PERFORMANCE;
                     DXTickStream stream = getOrCreate().getStream(topic);
                     TickCursor cursor = stream.createCursor(selectionOptions);
                     TimeBaseConsumer timeBaseConsumer = new TimeBaseConsumer(cursor, consumerCallback);

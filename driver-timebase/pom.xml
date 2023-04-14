@@ -36,30 +36,25 @@
     </distributionManagement>
 
     <dependencies>
-
         <dependency>
             <groupId>deltix.qsrv</groupId>
             <artifactId>deltix-timebase-api-messages</artifactId>
             <version>5.6.25</version>
         </dependency>
-
         <dependency>
             <groupId>deltix.qsrv.timebase</groupId>
             <artifactId>deltix-timebase-api</artifactId>
             <version>7.2.7</version>
         </dependency>
-
         <dependency>
             <groupId>deltix.qsrv.timebase</groupId>
             <artifactId>deltix-timebase-client</artifactId>
             <version>7.2.7</version>
         </dependency>
-
         <dependency>
-            <groupId>io.openmessaging.benchmark</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>driver-api</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-            <scope>compile</scope>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

@@ -35,13 +35,18 @@ public class TimeBaseProducer implements BenchmarkProducer {
         message = new BinaryPayloadMessage();
         message.setSymbol("TEST");
         message.setInstrumentType(InstrumentType.EQUITY);
+        message.setPayload(new ByteArrayList());
     }
 
     @Override
     public CompletableFuture<Void> sendAsync(Optional<String> key, byte[] payload) {
 
         CompletableFuture<Void> future = new CompletableFuture<>();
-        message.setPayload(new ByteArrayList(payload));
+
+        ByteArrayList arr = message.getPayload();
+        arr.clear();
+        arr.addAll(payload, 0, payload.length);
+
         long now = System.currentTimeMillis();
         message.setTimeStampMs(now);
 
@@ -57,7 +62,7 @@ public class TimeBaseProducer implements BenchmarkProducer {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         if (loader != null) {
             loader.close();
         }

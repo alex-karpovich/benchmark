@@ -16,7 +16,7 @@ package io.openmessaging.benchmark.driver.timebase;
 
 import deltix.data.stream.MessageChannel;
 import deltix.qsrv.hf.pub.InstrumentType;
-import deltix.qsrv.hf.pub.RawMessage;
+import deltix.util.collections.generated.ByteArrayList;
 import io.openmessaging.benchmark.driver.BenchmarkProducer;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -28,24 +28,28 @@ public class TimeBaseProducer implements BenchmarkProducer {
     private static final Logger LOGGER = LoggerFactory.getLogger(TimeBaseProducer.class);
 
     private final MessageChannel loader;
-    private final RawMessage message = new RawMessage(TimeBaseDriver.messageDescriptor);
+    private final BinaryPayloadMessage message;
 
     public TimeBaseProducer(MessageChannel loader) {
         this.loader = loader;
+        message = new BinaryPayloadMessage();
+        message.setSymbol("TEST");
+        message.setInstrumentType(InstrumentType.EQUITY);
     }
 
     @Override
     public CompletableFuture<Void> sendAsync(Optional<String> key, byte[] payload) {
 
         CompletableFuture<Void> future = new CompletableFuture<>();
+        message.setPayload(new ByteArrayList(payload));
+        long now = System.currentTimeMillis();
+        message.setTimeStampMs(now);
 
         try {
-            message.data = payload;
-            message.setSymbol("TEST");
-            message.setInstrumentType(InstrumentType.EQUITY);
             loader.send(message);
             future.complete(null);
         } catch (Exception ex) {
+            LOGGER.error("Error on sending message: {}", ex);
             future.completeExceptionally(ex);
         }
 

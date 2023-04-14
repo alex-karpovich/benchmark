@@ -13,14 +13,13 @@
  */
 package io.openmessaging.benchmark.driver.timebase;
 
+import static deltix.qsrv.hf.pub.ChannelPerformance.LOW_LATENCY;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import deltix.data.stream.MessageChannel;
-import deltix.qsrv.hf.pub.md.BinaryDataType;
-import deltix.qsrv.hf.pub.md.DataField;
-import deltix.qsrv.hf.pub.md.NonStaticDataField;
+import deltix.qsrv.hf.pub.md.Introspector;
 import deltix.qsrv.hf.pub.md.RecordClassDescriptor;
 import deltix.qsrv.hf.spi.conn.DisconnectEventListener;
 import deltix.qsrv.hf.spi.conn.Disconnectable;
@@ -55,7 +54,7 @@ public class TimeBaseDriver implements BenchmarkDriver {
 
     private DXTickDB client;
     private TimeBaseConfig config;
-    private final Map<String, TopicConfig> topicConfigMap = new ConcurrentHashMap<>();
+    private final Map<String, ProducerSupplier> topicToProducer = new ConcurrentHashMap<>();
     private final Map<String, CompletableFuture<BenchmarkConsumer>> subscriptionToConsumer =
             new ConcurrentHashMap<>();
 
@@ -65,37 +64,25 @@ public class TimeBaseDriver implements BenchmarkDriver {
             new ObjectMapper(new YAMLFactory())
                     .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-    static RecordClassDescriptor messageDescriptor;
+    private static final RecordClassDescriptor messageDescriptor =
+            getDescriptorForInstrumentMessage();
 
-    private static class TopicConfig {
+    private class ProducerSupplier {
         private final int partitionCount;
         private int producerCount = 0;
 
-        TopicConfig(int partitionCount) {
+        ProducerSupplier(int partitionCount) {
             this.partitionCount = partitionCount;
         }
 
-        synchronized boolean canAddProducer() {
+        public synchronized CompletableFuture<BenchmarkProducer> create(String topic) {
             if (producerCount >= partitionCount) {
-                return false;
+                throw new IllegalStateException("Too many producers!");
             }
             producerCount++;
-            return true;
+            String partitionKey = PARTITION_PREFIX + producerCount;
+            return createProducer(topic, partitionKey);
         }
-
-        synchronized int getProducerCount() {
-            return producerCount;
-        }
-    }
-
-    static {
-        final String name = "BinaryMessage";
-
-        final DataField[] fields = {
-            new NonStaticDataField("data", "data", BinaryDataType.getDefaultInstance())
-        };
-
-        messageDescriptor = new RecordClassDescriptor(name, name, false, null, fields);
     }
 
     private static class EventListener implements DisconnectEventListener {
@@ -173,23 +160,34 @@ public class TimeBaseDriver implements BenchmarkDriver {
                             StreamOptions.fixedType(StreamScope.DURABLE, topic, topic, 0, messageDescriptor);
                     options.replicationFactor = config.replicationFactor;
                     getOrCreate().createStream(topic, options);
-                    topicConfigMap.put(topic, new TopicConfig(partitions));
+                    topicToProducer.put(topic, new ProducerSupplier(partitions));
                 });
+    }
+
+    private static RecordClassDescriptor getDescriptorForInstrumentMessage() {
+        Introspector ix = Introspector.createEmptyMessageIntrospector();
+        try {
+            return ix.introspectRecordClass("Get test RD", BinaryPayloadMessage.class);
+        } catch (Introspector.IntrospectionException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public CompletableFuture<BenchmarkProducer> createProducer(String topic) {
-        TopicConfig topicConfig = topicConfigMap.get(topic);
-        if (topicConfig == null) {
+        ProducerSupplier producerSupplier = topicToProducer.get(topic);
+        if (producerSupplier == null) {
             throw new IllegalArgumentException("Unknown topic: " + topic);
         }
-        if (!topicConfig.canAddProducer()) {
-            throw new IllegalStateException("Too many producers!");
-        }
-        LoadingOptions loadingOptions = LoadingOptions.withAppendMode(true);
-        int count = topicConfig.getProducerCount();
-        loadingOptions.space = PARTITION_PREFIX + count;
-        DXTickStream stream = getOrCreate().getStream(topic);
+        return producerSupplier.create(topic);
+    }
+
+    private CompletableFuture<BenchmarkProducer> createProducer(
+            String streamKey, String partitionKey) {
+        LoadingOptions loadingOptions = LoadingOptions.withAppendMode(false);
+        loadingOptions.channelPerformance = LOW_LATENCY;
+        loadingOptions.space = partitionKey;
+        DXTickStream stream = getOrCreate().getStream(streamKey);
         MessageChannel loader = stream.createLoader(loadingOptions);
         TimeBaseProducer producer = new TimeBaseProducer(loader);
         return CompletableFuture.completedFuture(producer);
@@ -201,7 +199,7 @@ public class TimeBaseDriver implements BenchmarkDriver {
         return subscriptionToConsumer.computeIfAbsent(
                 subscriptionName,
                 (key) -> {
-                    SelectionOptions selectionOptions = new SelectionOptions(true, true);
+                    SelectionOptions selectionOptions = new SelectionOptions(false, true);
                     DXTickStream stream = getOrCreate().getStream(topic);
                     TickCursor cursor = stream.createCursor(selectionOptions);
                     TimeBaseConsumer timeBaseConsumer = new TimeBaseConsumer(cursor, consumerCallback);

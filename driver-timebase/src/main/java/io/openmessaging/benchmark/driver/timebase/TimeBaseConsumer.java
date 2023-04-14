@@ -14,7 +14,6 @@
 package io.openmessaging.benchmark.driver.timebase;
 
 
-import deltix.qsrv.hf.pub.RawMessage;
 import deltix.qsrv.hf.tickdb.pub.TickCursor;
 import io.openmessaging.benchmark.driver.BenchmarkConsumer;
 import io.openmessaging.benchmark.driver.ConsumerCallback;
@@ -46,11 +45,12 @@ public class TimeBaseConsumer implements BenchmarkConsumer {
                     cursor.subscribeToAllEntities();
                     try {
                         while (!closing && cursor.next()) {
-                            RawMessage message = (RawMessage) cursor.getMessage();
-                            callback.messageReceived(message.data, message.getTimeStampMs());
+                            BinaryPayloadMessage message = (BinaryPayloadMessage) cursor.getMessage();
+                            callback.messageReceived(
+                                    message.getPayload().getInternalBuffer(), message.getTimeStampMs());
                         }
                     } catch (Exception e) {
-                        LOGGER.error("Error occurred while reading message by consumer {}", cursor);
+                        LOGGER.error("Error occurred while reading message by consumer {}: {}", cursor, e);
                     }
                     LOGGER.info("Consumer {} stopped reading messages", cursor);
                 });

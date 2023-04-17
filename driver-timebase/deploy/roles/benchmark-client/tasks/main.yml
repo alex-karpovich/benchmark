@@ -13,6 +13,18 @@
 # limitations under the License.
 #
 
+- name: Install Java
+  command: amazon-linux-extras install java-openjdk11 -y
+  args:
+    creates: /usr/bin/java
+
+- name: Set vm.max_map_count
+  sysctl:
+    name: vm.max_map_count
+    value: '262144'
+    state: present
+    reload: yes
+
 - name: Delete existing benchmark directory
   file: path=/opt/benchmark state=absent
 
@@ -36,10 +48,15 @@
       regexp: '^JVM_MEM='
       line: 'JVM_MEM="-Xmx4G"'
 
-- name: Generate benchmark worker 
-  template:
-    src: "templates/workers.yaml"
-    dest: "/opt/benchmark/workers.yaml"
+- name: Set Timebase connection string
+  set_fact:
+    tb_hosts: "{{ groups['timebase'] | map('extract', hostvars, ['ansible_default_ipv4', 'address']) | map('regex_replace', '^(.*)$', '\\1:8011') | join('|') }}"
+
+- name: Configure Timebase driver
+  lineinfile:
+      dest: '/opt/benchmark/driver-timebase/timebase-latency.yaml'
+      regexp: '^connectionUrl'
+      line: "connectionUrl: dxctick://{{ tb_hosts }}"
 
 - name: Install benchmark systemd service
   copy:
@@ -50,3 +67,4 @@
     state: restarted
     daemon_reload: yes
     name: "benchmark-worker"
+    enabled: true

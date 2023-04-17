@@ -21,3 +21,4 @@ TimeBase.cluster.group=tbcluster
 TimeBase.cluster.enabled=true
 TimeBase.cluster.stream.replicationFactor=2
 TimeBase.cluster.blockAllocatorType=MEMBER_KEY
+TimeBase.cluster.leaderEventNotificationAddress={{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:7082

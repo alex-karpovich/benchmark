@@ -13,19 +13,6 @@
 # limitations under the License.
 #
 
-- hosts: client
-  gather_facts: true
-  remote_user: ec2-user
-  pre_tasks:
-    - include_vars: ./defaults/main.yml
-    - wait_for_connection:
-        timeout: 300
-    - setup: {}
-  roles:
-    - tuned
-    - chrony
-    - benchmark-client
-
 - hosts: timebase
   gather_facts: true
   remote_user: ec2-user
@@ -40,3 +27,24 @@
     - chrony
     - docker
     - timebase
+
+- hosts: client
+  gather_facts: true
+  remote_user: ec2-user
+  pre_tasks:
+    - include_vars: ./defaults/main.yml
+    - wait_for_connection:
+        timeout: 300
+    - setup: {}
+  roles:
+    - tuned
+    - chrony
+    - benchmark-client
+
+- hosts: localhost
+  gather_facts: false
+  become: false
+  pre_tasks:
+    - include_vars: ./defaults/main.yml
+  tasks:
+    - debug: msg="{{ info_message.split('\n') }}"

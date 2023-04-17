@@ -26,3 +26,10 @@ deltix_registry_pass: "{{ lookup('env','TESTING_REGISTRY_PASS') | default('chang
 timebase_image: "{{ lookup('env','TESTING_TIMEBASE_IMAGE') | default('changeme', true)}}"
 timebase_tag: "{{ lookup('env','TESTING_TIMEBASE_TAG') | default('changeme', true)}}"
 timebase_serial: "{{ lookup('env','TESTING_TIMEBASE_SERIAL') | default('changeme', true)}}"
+
+# Misc
+
+info_message: | 
+  Connection information:
+  Timebase hosts: {{ groups['timebase'] | map('extract', hostvars, ['inventory_hostname']) | join(', ') }}
+  Client host: {{ groups['client'][0] }}

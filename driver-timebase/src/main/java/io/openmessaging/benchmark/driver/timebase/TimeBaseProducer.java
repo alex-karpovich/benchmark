@@ -34,7 +34,8 @@ public class TimeBaseProducer implements BenchmarkProducer {
     private final boolean raw;
     private final InstrumentMessage message;
 
-    public TimeBaseProducer(MessageChannel loader, boolean raw, RecordClassDescriptor messageDescriptor) {
+    public TimeBaseProducer(
+            MessageChannel loader, boolean raw, RecordClassDescriptor messageDescriptor) {
         this.loader = loader;
         this.raw = raw;
 

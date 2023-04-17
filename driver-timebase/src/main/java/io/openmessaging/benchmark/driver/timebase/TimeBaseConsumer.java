@@ -16,7 +16,6 @@ package io.openmessaging.benchmark.driver.timebase;
 
 import deltix.qsrv.hf.pub.InstrumentMessage;
 import deltix.qsrv.hf.pub.RawMessage;
-import deltix.qsrv.hf.pub.md.RecordClassDescriptor;
 import deltix.qsrv.hf.tickdb.pub.TickCursor;
 import io.openmessaging.benchmark.driver.BenchmarkConsumer;
 import io.openmessaging.benchmark.driver.ConsumerCallback;

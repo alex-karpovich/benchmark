@@ -55,7 +55,6 @@ public class TimeBaseDriver implements BenchmarkDriver {
     private static final String PARTITION_PREFIX = "p_";
 
     private static final ChannelPerformance CHANNEL_PERFORMANCE = LOW_LATENCY;
-    private static final boolean RAW = true;
 
     private DXTickDB client;
     private TimeBaseConfig config;
@@ -194,7 +193,7 @@ public class TimeBaseDriver implements BenchmarkDriver {
         loadingOptions.space = partitionKey;
         DXTickStream stream = getOrCreate().getStream(streamKey);
         MessageChannel loader = stream.createLoader(loadingOptions);
-        TimeBaseProducer producer = new TimeBaseProducer(loader, RAW, messageDescriptor);
+        TimeBaseProducer producer = new TimeBaseProducer(loader, config.raw, messageDescriptor);
         return CompletableFuture.completedFuture(producer);
     }
 

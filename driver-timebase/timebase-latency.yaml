@@ -20,3 +20,5 @@ driverClass: io.openmessaging.benchmark.driver.timebase.TimeBaseDriver
 replicationFactor: 2
 
 connectionUrl: dxctick://localhost:8011|localhost:8021|localhost:8031
+
+raw: true

@@ -61,7 +61,9 @@ public class TimeBaseConsumer implements BenchmarkConsumer {
                             callback.messageReceived(payloadData, cursorMessage.getTimeStampMs());
                         }
                     } catch (Exception e) {
-                        LOGGER.error("Error occurred while reading message by consumer {}", cursor, e);
+                        if (!closing) {
+                            LOGGER.error("Error occurred while reading message by consumer {}", cursor, e);
+                        }
                     }
                     LOGGER.info("Consumer {} stopped reading messages", cursor);
                 });

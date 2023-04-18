@@ -25,4 +25,4 @@
     name: tuned
 
 - name: Apply tuned profile 
-  shell: tuned-adm profile latency-performance
+  shell: tuned-adm --async profile latency-performance

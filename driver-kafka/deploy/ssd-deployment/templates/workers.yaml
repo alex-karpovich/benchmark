@@ -15,5 +15,5 @@
 
 workers:
 {% for worker in groups['client'] %}
-  - http://{{ hostvars[worker].private_ip }}:8080
+  - http://{{ hostvars[worker]['ansible_default_ipv4']['address'] }}:8080
 {% endfor %}

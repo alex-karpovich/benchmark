@@ -1,5 +1,5 @@
 provider "aws" {
-  region  = "${var.region}"
+  region  = var.region
   version = "3.50"
 }
 
@@ -51,27 +51,27 @@ resource "aws_vpc" "benchmark_vpc" {
 
 # Create an internet gateway to give our subnet access to the outside world
 resource "aws_internet_gateway" "kafka" {
-  vpc_id = "${aws_vpc.benchmark_vpc.id}"
+  vpc_id = aws_vpc.benchmark_vpc.id
 }
 
 # Grant the VPC internet access on its main route table
 resource "aws_route" "internet_access" {
-  route_table_id         = "${aws_vpc.benchmark_vpc.main_route_table_id}"
+  route_table_id         = aws_vpc.benchmark_vpc.main_route_table_id
   destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = "${aws_internet_gateway.kafka.id}"
+  gateway_id             = aws_internet_gateway.kafka.id
 }
 
 # Create a subnet to launch our instances into
 resource "aws_subnet" "benchmark_subnet" {
-  vpc_id                  = "${aws_vpc.benchmark_vpc.id}"
+  vpc_id                  = aws_vpc.benchmark_vpc.id
   cidr_block              = "10.0.0.0/24"
   map_public_ip_on_launch = true
-  availability_zone       = "${var.az}"
+  availability_zone       = var.az
 }
 
 resource "aws_security_group" "benchmark_security_group" {
   name   = "terraform-kafka-${random_id.hash.hex}"
-  vpc_id = "${aws_vpc.benchmark_vpc.id}"
+  vpc_id = aws_vpc.benchmark_vpc.id
 
   # SSH access from anywhere
   ingress {
@@ -104,16 +104,16 @@ resource "aws_security_group" "benchmark_security_group" {
 
 resource "aws_key_pair" "auth" {
   key_name   = "${var.key_name}-${random_id.hash.hex}"
-  public_key = "${file(var.public_key_path)}"
+  public_key = file(var.public_key_path)
 }
 
 resource "aws_instance" "zookeeper" {
-  ami                    = "${var.ami}"
-  instance_type          = "${var.instance_types["zookeeper"]}"
-  key_name               = "${aws_key_pair.auth.id}"
-  subnet_id              = "${aws_subnet.benchmark_subnet.id}"
+  ami                    = var.ami
+  instance_type          = var.instance_types["zookeeper"]
+  key_name               = aws_key_pair.auth.id
+  subnet_id              = aws_subnet.benchmark_subnet.id
   vpc_security_group_ids = ["${aws_security_group.benchmark_security_group.id}"]
-  count                  = "${var.num_instances["zookeeper"]}"
+  count                  = var.num_instances["zookeeper"]
 
   tags = {
     Name      = "zk_${count.index}"
@@ -122,12 +122,12 @@ resource "aws_instance" "zookeeper" {
 }
 
 resource "aws_instance" "kafka" {
-  ami                    = "${var.ami}"
-  instance_type          = "${var.instance_types["kafka"]}"
-  key_name               = "${aws_key_pair.auth.id}"
-  subnet_id              = "${aws_subnet.benchmark_subnet.id}"
+  ami                    = var.ami
+  instance_type          = var.instance_types["kafka"]
+  key_name               = aws_key_pair.auth.id
+  subnet_id              = aws_subnet.benchmark_subnet.id
   vpc_security_group_ids = ["${aws_security_group.benchmark_security_group.id}"]
-  count                  = "${var.num_instances["kafka"]}"
+  count                  = var.num_instances["kafka"]
 
   tags = {
     Name      = "kafka_${count.index}"
@@ -136,12 +136,12 @@ resource "aws_instance" "kafka" {
 }
 
 resource "aws_instance" "client" {
-  ami                    = "${var.ami}"
-  instance_type          = "${var.instance_types["client"]}"
-  key_name               = "${aws_key_pair.auth.id}"
-  subnet_id              = "${aws_subnet.benchmark_subnet.id}"
+  ami                    = var.ami
+  instance_type          = var.instance_types["client"]
+  key_name               = aws_key_pair.auth.id
+  subnet_id              = aws_subnet.benchmark_subnet.id
   vpc_security_group_ids = ["${aws_security_group.benchmark_security_group.id}"]
-  count                  = "${var.num_instances["client"]}"
+  count                  = var.num_instances["client"]
 
   tags = {
     Name      = "kafka_client_${count.index}"
@@ -149,10 +149,22 @@ resource "aws_instance" "client" {
   }
 }
 
+# generate inventory file for Ansible
+resource "local_file" "hosts_cfg" {
+  content = templatefile("${path.module}/templates/hosts.tpl",
+    {
+      client_hosts    = aws_instance.client.*.public_ip
+      kafka_hosts     = aws_instance.kafka.*.public_ip
+      zookeeper_hosts = aws_instance.zookeeper.*.public_ip
+    }
+  )
+  filename = "hosts.ini"
+}
+
 output "kafka_ssh_host" {
-  value = "${aws_instance.kafka.0.public_ip}"
+  value = aws_instance.kafka.0.public_ip
 }
 
 output "client_ssh_host" {
-  value = "${aws_instance.client.0.public_ip}"
+  value = aws_instance.client.0.public_ip
 }

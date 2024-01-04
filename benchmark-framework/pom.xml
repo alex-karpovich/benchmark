@@ -35,7 +35,7 @@
             <artifactId>driver-api</artifactId>
             <version>${project.version}</version>
         </dependency>
-<!--
+        <!--
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>driver-artemis</artifactId>
@@ -63,7 +63,7 @@
             <artifactId>driver-kafka</artifactId>
             <version>${project.version}</version>
         </dependency>
-<!--
+        <!--
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>driver-kop</artifactId>

@@ -36,3 +36,19 @@ sudo bin/benchmark \
 workloads/1-topic-16-partition-256b.yaml
 ```
 
+Running from Java IDE:
+
+```
+Main: io.openmessaging.benchmark.Benchmark
+--drivers driver-timebase/timebase-latency.yaml \
+workloads/1-topic-16-partition-256b.yaml
+```
+
+Running from Java IDE:
+
+```
+Main: io.openmessaging.benchmark.Benchmark
+--drivers driver-timebase/timebase-latency.yaml \
+workloads/1-topic-16-partition-256b.yaml
+```
+

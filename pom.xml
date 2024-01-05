@@ -47,6 +47,7 @@
         <!--        <module>driver-pulsar</module>-->
         <module>driver-kafka</module>
         <module>driver-timebase</module>
+        <module>driver-timebase-ce</module>
         <!--        <module>driver-rabbitmq</module>-->
         <!--        <module>driver-artemis</module>-->
         <!--        <module>driver-bookkeeper</module>-->

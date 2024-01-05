@@ -488,6 +488,8 @@ public class WorkloadGenerator implements AutoCloseable {
                         agg.endToEndLatency.getValueAtPercentile(99.9) / 1000.0;
                 result.aggregatedEndToEndLatency9999pct =
                         agg.endToEndLatency.getValueAtPercentile(99.99) / 1000.0;
+                result.aggregatedEndToEndLatency99999pct =
+                        agg.endToEndLatency.getValueAtPercentile(99.999) / 1000.0;
                 result.aggregatedEndToEndLatencyMax = agg.endToEndLatency.getMaxValue() / 1000.0;
 
                 agg.publishLatency

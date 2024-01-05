@@ -94,6 +94,7 @@ public class TestResult {
     public double aggregatedEndToEndLatency99pct;
     public double aggregatedEndToEndLatency999pct;
     public double aggregatedEndToEndLatency9999pct;
+    public double aggregatedEndToEndLatency99999pct;
     public double aggregatedEndToEndLatencyMax;
 
     public int getTopics() {

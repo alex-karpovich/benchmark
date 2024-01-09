@@ -162,7 +162,7 @@ public class TimeBaseDriver implements BenchmarkDriver {
                 () -> {
                     StreamOptions options =
                             StreamOptions.fixedType(StreamScope.DURABLE, topic, topic, 0, messageDescriptor);
-                    options.replicationFactor = config.replicationFactor;
+
                     getOrCreate().createStream(topic, options);
                     topicToProducer.put(topic, new ProducerSupplier(partitions));
                 });
@@ -191,6 +191,7 @@ public class TimeBaseDriver implements BenchmarkDriver {
         LoadingOptions loadingOptions = LoadingOptions.withAppendMode(config.raw);
         loadingOptions.channelPerformance = CHANNEL_PERFORMANCE;
         loadingOptions.space = partitionKey;
+        LOGGER.info("Producer for stream {} with partition {} created", streamKey, partitionKey);
         DXTickStream stream = getOrCreate().getStream(streamKey);
         MessageChannel loader = stream.createLoader(loadingOptions);
         TimeBaseProducer producer = new TimeBaseProducer(loader, config.raw, messageDescriptor);
@@ -203,6 +204,7 @@ public class TimeBaseDriver implements BenchmarkDriver {
         return subscriptionToConsumer.computeIfAbsent(
                 subscriptionName,
                 (key) -> {
+                    LOGGER.info("Consumer for stream {} with subscription {} created", topic, key);
                     SelectionOptions selectionOptions = new SelectionOptions(config.raw, true);
                     selectionOptions.channelPerformance = CHANNEL_PERFORMANCE;
                     DXTickStream stream = getOrCreate().getStream(topic);

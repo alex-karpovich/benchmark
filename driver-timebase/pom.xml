@@ -36,7 +36,7 @@
     </distributionManagement>
 
     <properties>
-        <timebase.version>7.2.8</timebase.version>
+        <timebase.version>5.6.57</timebase.version>
     </properties>
 
     <dependencies>
@@ -46,19 +46,23 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>deltix.qsrv</groupId>
-            <artifactId>deltix-timebase-api-messages</artifactId>
-            <version>5.6.25</version>
+            <groupId>com.github.spotbugs</groupId>
+            <artifactId>spotbugs-annotations</artifactId>
         </dependency>
-        <dependency>
-            <groupId>deltix.qsrv.timebase</groupId>
-            <artifactId>deltix-timebase-api</artifactId>
-            <version>${timebase.version}</version>
-        </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>deltix.qsrv.timebase</groupId>-->
+        <!--            <artifactId>deltix-timebase-api</artifactId>-->
+        <!--            <version>${timebase.version}</version>-->
+        <!--        </dependency>-->
         <dependency>
             <groupId>deltix.qsrv.timebase</groupId>
             <artifactId>deltix-timebase-client</artifactId>
             <version>${timebase.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.epam.deltix</groupId>
+            <artifactId>gflog-slf4j</artifactId>
+            <version>3.0.3</version>
         </dependency>
     </dependencies>
 

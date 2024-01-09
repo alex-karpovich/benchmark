@@ -17,6 +17,7 @@ package io.openmessaging.benchmark.driver.tbce;
 import com.epam.deltix.qsrv.hf.pub.RawMessage;
 import com.epam.deltix.qsrv.hf.tickdb.pub.TickCursor;
 import com.epam.deltix.timebase.messages.InstrumentMessage;
+import com.epam.deltix.util.concurrent.CursorIsClosedException;
 import io.openmessaging.benchmark.driver.BenchmarkConsumer;
 import io.openmessaging.benchmark.driver.ConsumerCallback;
 import java.util.concurrent.ExecutorService;
@@ -55,12 +56,15 @@ public class TimeBaseConsumer implements BenchmarkConsumer {
                                 payloadData = rawMessage.data;
                             } else {
                                 BinaryPayloadMessage payloadMessage = (BinaryPayloadMessage) cursorMessage;
+                                // This is not correct. Internal buffer length may not match data size.
                                 payloadData = payloadMessage.getPayload().getInternalBuffer();
                             }
 
                             callback.messageReceived(payloadData, cursorMessage.getTimeStampMs());
                         }
-                    } catch (Exception e) {
+                    } catch (CursorIsClosedException e) {
+                        LOGGER.info("Cursor {} is closed", cursor);
+                    } catch (Throwable e) {
                         if (!closing) {
                             LOGGER.error("Error occurred while reading message by consumer {}", cursor, e);
                         }

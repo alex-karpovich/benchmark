@@ -19,6 +19,7 @@ import com.epam.deltix.qsrv.hf.pub.md.RecordClassDescriptor;
 import com.epam.deltix.streaming.MessageChannel;
 import com.epam.deltix.timebase.messages.InstrumentMessage;
 import com.epam.deltix.util.collections.generated.ByteArrayList;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.openmessaging.benchmark.driver.BenchmarkProducer;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -28,6 +29,10 @@ import org.slf4j.LoggerFactory;
 public class TimeBaseProducer implements BenchmarkProducer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TimeBaseProducer.class);
+
+    @SuppressFBWarnings("EI_EXPOSE_REP")
+    private static final CompletableFuture<Void> COMPLETED_FUTURE =
+            CompletableFuture.completedFuture(null);
 
     private final MessageChannel loader;
     private final boolean raw;
@@ -52,9 +57,6 @@ public class TimeBaseProducer implements BenchmarkProducer {
 
     @Override
     public CompletableFuture<Void> sendAsync(Optional<String> key, byte[] payload) {
-
-        CompletableFuture<Void> future = new CompletableFuture<>();
-
         if (raw) {
             RawMessage rawMessage = (RawMessage) message;
             rawMessage.data = payload;
@@ -70,13 +72,13 @@ public class TimeBaseProducer implements BenchmarkProducer {
 
         try {
             loader.send(message);
-            future.complete(null);
+            return COMPLETED_FUTURE;
         } catch (Exception ex) {
             LOGGER.error("Error on sending message", ex);
+            CompletableFuture<Void> future = new CompletableFuture<>();
             future.completeExceptionally(ex);
+            return future;
         }
-
-        return future;
     }
 
     @Override

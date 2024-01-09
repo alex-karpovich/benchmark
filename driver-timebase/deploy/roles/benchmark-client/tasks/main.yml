@@ -56,7 +56,7 @@
   lineinfile:
       dest: '/opt/benchmark/driver-timebase/timebase-latency.yaml'
       regexp: '^connectionUrl'
-      line: "connectionUrl: dxctick://{{ tb_hosts }}"
+      line: "connectionUrl: dxtick://{{ tb_hosts }}"
 
 - name: Install benchmark systemd service
   copy:

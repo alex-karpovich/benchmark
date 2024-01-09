@@ -54,7 +54,7 @@ To run the test, login to deployed client node (its IP address will be shown at 
 
 ```bash
 cd /opt/benchmark
-sudo bin/benchmark --drivers driver-timebase-ce/timebase-latency.yaml workloads/1-topic-16-partition-256b.yaml
+sudo bin/benchmark --drivers driver-timebase-ce/timebase-ce.yaml workloads/1-topic-16-partition-256b.yaml
 ```
 
 When the test will finish, a JSON file with results will be stored within _/opt/benchmark_ directory. Use the following command to retrieve this file to your local machine:

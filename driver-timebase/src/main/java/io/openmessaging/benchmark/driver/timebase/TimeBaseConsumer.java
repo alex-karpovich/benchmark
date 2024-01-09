@@ -17,6 +17,7 @@ package io.openmessaging.benchmark.driver.timebase;
 import deltix.qsrv.hf.pub.InstrumentMessage;
 import deltix.qsrv.hf.pub.RawMessage;
 import deltix.qsrv.hf.tickdb.pub.TickCursor;
+import deltix.util.concurrent.CursorIsClosedException;
 import io.openmessaging.benchmark.driver.BenchmarkConsumer;
 import io.openmessaging.benchmark.driver.ConsumerCallback;
 import java.util.concurrent.ExecutorService;
@@ -60,7 +61,9 @@ public class TimeBaseConsumer implements BenchmarkConsumer {
 
                             callback.messageReceived(payloadData, cursorMessage.getTimeStampMs());
                         }
-                    } catch (Exception e) {
+                    } catch (CursorIsClosedException e) {
+                        LOGGER.info("Cursor {} is closed", cursor);
+                    } catch (Throwable e) {
                         if (!closing) {
                             LOGGER.error("Error occurred while reading message by consumer {}", cursor, e);
                         }

@@ -13,10 +13,12 @@
 #
 
 
-name: TimeBase
-driverClass: io.openmessaging.benchmark.driver.timebase.TimeBaseDriver
+name: TimeBaseCluster
+driverClass: io.openmessaging.benchmark.driver.tbcluster.TimeBaseDriver
 
+# Timebase client-specific configuration
+replicationFactor: 2
 
-connectionUrl: dxctick://localhost:8011|localhost:8021|localhost:8031
+connectionUrl: dxctick://localhost:18011|localhost:18012|localhost:18013
 
 raw: true

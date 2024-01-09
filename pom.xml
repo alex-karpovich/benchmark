@@ -48,6 +48,7 @@
         <module>driver-kafka</module>
         <module>driver-timebase</module>
         <module>driver-timebase-ce</module>
+        <module>driver-timebase-cluster</module>
         <!--        <module>driver-rabbitmq</module>-->
         <!--        <module>driver-artemis</module>-->
         <!--        <module>driver-bookkeeper</module>-->
@@ -88,6 +89,7 @@
         <maven.enforcer.plugin.version>3.1.0</maven.enforcer.plugin.version>
         <maven.surefire.plugin.version>3.0.0-M7</maven.surefire.plugin.version>
         <spotbugs.plugin.version>4.7.2.0</spotbugs.plugin.version>
+        <spotbugs.api.version>4.7.2</spotbugs.api.version>
         <spotless.plugin.version>2.25.0</spotless.plugin.version>
     </properties>
 
@@ -117,6 +119,11 @@
                 <groupId>com.fasterxml.jackson.jaxrs</groupId>
                 <artifactId>jackson-jaxrs-json-provider</artifactId>
                 <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-annotations</artifactId>
+                <version>${spotbugs.api.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>

@@ -25,6 +25,7 @@ def create_charts(test_results):
     # Group results for same workload
     workload_results = {}
     for test_result in test_results:
+        print('Loading', test_result)
         result = json.load(open(test_result))
         if not result['workload'] in workload_results:
             workload_results[result['workload']] = []

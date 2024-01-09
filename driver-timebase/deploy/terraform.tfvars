@@ -10,5 +10,5 @@ instance_types = {
 
 num_instances = {
   "client"   = 1
-  "timebase" = 3
+  "timebase" = 1
 }

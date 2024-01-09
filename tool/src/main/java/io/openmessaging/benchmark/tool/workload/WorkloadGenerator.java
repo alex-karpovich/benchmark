@@ -47,6 +47,7 @@ class WorkloadGenerator {
         workload.testDurationMinutes = template.testDurationMinutes;
         workload.warmupDurationMinutes = template.warmupDurationMinutes;
         workload.useRandomizedPayloads = template.useRandomizedPayloads;
+        workload.backlogOnly = template.backlogOnly;
         for (int t : template.topics) {
             for (int pa : template.partitionsPerTopic) {
                 for (int ms : template.messageSize) {

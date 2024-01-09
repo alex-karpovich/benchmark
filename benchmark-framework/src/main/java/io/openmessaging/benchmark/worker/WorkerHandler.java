@@ -42,6 +42,7 @@ public class WorkerHandler {
     public static final String START_LOAD = "/start-load";
     public static final String ADJUST_PUBLISH_RATE = "/adjust-publish-rate";
     public static final String STOP_ALL = "/stop-all";
+    public static final String STOP_PRODUCERS = "/stop-producers";
     public static final String PERIOD_STATS = "/period-stats";
     public static final String CUMULATIVE_LATENCIES = "/cumulative-latencies";
     public static final String COUNTERS_STATS = "/counters-stats";
@@ -61,6 +62,7 @@ public class WorkerHandler {
         app.post(START_LOAD, this::handleStartLoad);
         app.post(ADJUST_PUBLISH_RATE, this::handleAdjustPublishRate);
         app.post(STOP_ALL, this::handleStopAll);
+        app.post(STOP_PRODUCERS, this::handleStopProducers);
         app.get(PERIOD_STATS, this::handlePeriodStats);
         app.get(CUMULATIVE_LATENCIES, this::handleCumulativeLatencies);
         app.get(COUNTERS_STATS, this::handleCountersStats);
@@ -130,6 +132,11 @@ public class WorkerHandler {
     private void handleStopAll(Context ctx) throws Exception {
         log.info("Stop All");
         localWorker.stopAll();
+    }
+
+    private void handleStopProducers(Context ctx) throws Exception {
+        log.info("Stop Producers");
+        localWorker.stopProducers();
     }
 
     private void handlePeriodStats(Context ctx) throws Exception {

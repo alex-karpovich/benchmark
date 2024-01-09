@@ -49,6 +49,9 @@ public class Workload {
      *
      * <p>The testDurationMinutes will be overruled to allow the test to complete when the consumer
      * has drained all the backlog and it's on par with the producer
+     *
+     * <p>If {@link #backlogOnly} is enabled, the test will only generate backlog and then start
+     * consumers.
      */
     public long consumerBacklogSizeGB = 0;
     /**
@@ -61,6 +64,12 @@ public class Workload {
      * after the specified time irrespective of how much of the backlog has been drained.
      */
     public double backlogDrainRatio = 1.0;
+
+    /**
+     * If enabled, consumers will work only with backlog. Producers will generate backlog of desired
+     * size and stop. Then consumers will start to drain backlog.
+     */
+    public boolean backlogOnly = false;
 
     public int testDurationMinutes;
 

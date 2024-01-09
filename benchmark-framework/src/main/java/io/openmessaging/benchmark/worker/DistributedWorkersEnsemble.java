@@ -169,6 +169,11 @@ public class DistributedWorkersEnsemble implements Worker {
     }
 
     @Override
+    public void stopProducers() {
+        workers.parallelStream().forEach(Worker::stopProducers);
+    }
+
+    @Override
     public String id() {
         return "Ensemble[" + workers.stream().map(Worker::id).collect(joining(",")) + "]";
     }

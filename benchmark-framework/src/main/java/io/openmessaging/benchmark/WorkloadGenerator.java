@@ -65,6 +65,9 @@ public class WorkloadGenerator implements AutoCloseable {
             throw new IllegalArgumentException(
                     "Cannot probe producer sustainable rate when building backlog");
         }
+        if (workload.backlogOnly && workload.consumerBacklogSizeGB <= 0) {
+            throw new IllegalArgumentException("Cannot run backlog only test without backlog size");
+        }
     }
 
     public TestResult run() throws Exception {
@@ -295,6 +298,13 @@ public class WorkloadGenerator implements AutoCloseable {
         }
 
         log.info("--- Completed backlog build in {} s ---", timer.elapsedSeconds());
+
+        if (workload.backlogOnly) {
+            worker.stopProducers();
+            worker.resetStats();
+            log.info("--- Stopped producers ---");
+        }
+
         timer = new Timer();
         log.info("--- Start draining backlog ---");
 
@@ -311,10 +321,14 @@ public class WorkloadGenerator implements AutoCloseable {
             if (currentBacklog <= minBacklog) {
                 log.info("--- Completed backlog draining in {} s ---", timer.elapsedSeconds());
 
-                try {
-                    Thread.sleep(MINUTES.toMillis(testDurationMinutes));
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
+                // If not "backlogOnly" mode then this will effectively increase test time by the time that
+                // was spent by backlog draining.
+                if (!workload.backlogOnly) {
+                    try {
+                        Thread.sleep(MINUTES.toMillis(testDurationMinutes));
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
 
                 needToWaitForBacklogDraining = false;
@@ -430,7 +444,22 @@ public class WorkloadGenerator implements AutoCloseable {
                     microsToMillis(stats.endToEndLatency.getValueAtPercentile(99.99)));
             result.endToEndLatencyMax.add(microsToMillis(stats.endToEndLatency.getMaxValue()));
 
-            if (now >= testEndTime && !needToWaitForBacklogDraining) {
+            boolean stopTest;
+            boolean testTimeCompleted = now >= testEndTime;
+            if (workload.backlogOnly) {
+                stopTest = testTimeCompleted || !needToWaitForBacklogDraining;
+            } else {
+                stopTest = testTimeCompleted && !needToWaitForBacklogDraining;
+            }
+
+            if (stopTest) {
+                if (workload.backlogOnly) {
+                    log.info(
+                            "Stopping test. Reason: {}",
+                            testTimeCompleted ? "Test time completed" : "Backlog drained");
+                }
+
+                // Stop test
                 CumulativeLatencies agg = worker.getCumulativeLatencies();
                 log.info(
                         "----- Aggregated Pub Latency (ms) avg: {} - 50%: {} - 95%: {} - 99%: {} - 99.9%: {} - 99.99%: {} - Max: {} | Pub Delay (us)  avg: {} - 50%: {} - 95%: {} - 99%: {} - 99.9%: {} - 99.99%: {} - Max: {}",

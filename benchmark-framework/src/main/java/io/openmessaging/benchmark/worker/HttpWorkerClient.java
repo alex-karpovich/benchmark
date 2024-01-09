@@ -27,6 +27,7 @@ import static io.openmessaging.benchmark.worker.WorkerHandler.RESET_STATS;
 import static io.openmessaging.benchmark.worker.WorkerHandler.RESUME_CONSUMERS;
 import static io.openmessaging.benchmark.worker.WorkerHandler.START_LOAD;
 import static io.openmessaging.benchmark.worker.WorkerHandler.STOP_ALL;
+import static io.openmessaging.benchmark.worker.WorkerHandler.STOP_PRODUCERS;
 import static org.asynchttpclient.Dsl.asyncHttpClient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -139,6 +140,11 @@ public class HttpWorkerClient implements Worker {
     @Override
     public void stopAll() {
         sendPost(STOP_ALL);
+    }
+
+    @Override
+    public void stopProducers() {
+        sendPost(STOP_PRODUCERS);
     }
 
     @Override

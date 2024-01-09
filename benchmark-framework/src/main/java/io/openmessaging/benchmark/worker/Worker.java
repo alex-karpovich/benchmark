@@ -54,5 +54,7 @@ public interface Worker extends AutoCloseable {
 
     void stopAll();
 
+    void stopProducers();
+
     String id();
 }

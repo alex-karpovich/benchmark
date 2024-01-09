@@ -50,6 +50,7 @@ public class WorkloadSetTemplate {
     public double randomBytesRatio = 0.0;
     public int randomizedPayloadPoolSize = 0;
     public long consumerBacklogSizeGB = 0;
+    public boolean backlogOnly = false;
     public int testDurationMinutes = 5;
     public int warmupDurationMinutes = 1;
 }

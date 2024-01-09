@@ -67,7 +67,7 @@ public class LocalWorker implements Worker, ConsumerCallback {
     private final ExecutorService executor =
             Executors.newCachedThreadPool(new DefaultThreadFactory("local-worker"));
     private final WorkerStats stats;
-    private boolean testCompleted = false;
+    private volatile boolean stopProducers = false;
     private boolean consumersArePaused = false;
 
     public LocalWorker() {
@@ -82,7 +82,7 @@ public class LocalWorker implements Worker, ConsumerCallback {
     @Override
     public void initializeDriver(File driverConfigFile) throws IOException {
         Preconditions.checkArgument(benchmarkDriver == null);
-        testCompleted = false;
+        stopProducers = false;
 
         DriverConfiguration driverConfiguration =
                 mapper.readValue(driverConfigFile, DriverConfiguration.class);
@@ -200,7 +200,7 @@ public class LocalWorker implements Worker, ConsumerCallback {
         executor.submit(
                 () -> {
                     try {
-                        while (!testCompleted) {
+                        while (!stopProducers) {
                             producers.forEach(
                                     p ->
                                             messageProducer.sendMessage(
@@ -285,7 +285,7 @@ public class LocalWorker implements Worker, ConsumerCallback {
 
     @Override
     public void stopAll() {
-        testCompleted = true;
+        stopProducers = true;
         consumersArePaused = false;
         stats.reset();
 
@@ -306,6 +306,21 @@ public class LocalWorker implements Worker, ConsumerCallback {
                 benchmarkDriver.close();
                 benchmarkDriver = null;
             }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void stopProducers() {
+        stopProducers = true;
+        try {
+            Thread.sleep(100);
+
+            for (BenchmarkProducer producer : producers) {
+                producer.close();
+            }
+            producers.clear();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

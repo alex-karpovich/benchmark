@@ -71,4 +71,38 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+
+
+
+
+                <executions>
+                    <execution>
+                        <!--
+                        Run with:
+                        mvn -pl tool exec:java@generate-workloads
+                        -->
+                        <id>generate-workloads</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>io.openmessaging.benchmark.tool.workload.BatchWorkloadGeneratorTool</mainClass>
+                            <arguments>
+                                <argument>--template-folder</argument>
+                                <argument>workload-templates</argument>
+                                <argument>--output-folder</argument>
+                                <argument>workloads</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>

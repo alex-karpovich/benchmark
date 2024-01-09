@@ -27,8 +27,8 @@ Usage:
 ```
 mkdir my-workloads
 <java + cp> io.openmessaging.benchmark.tool.workload.WorkloadGenerationTool \
-  --templateFile=template.yaml \
-  --outputFolder=my-workloads
+  --template-file template.yaml \
+  --output-folder my-workloads
 ```
 
 Output:
@@ -66,3 +66,9 @@ testDurationMinutes: 5
 warmupDurationMinutes: 1
 ```
 
+# Batch generator
+Run Batch Workload Generator to generate workloads for all templates in `workload-templates` folder.
+```shell
+mvn -pl tool exec:java@generate-workloads
+```
+See `tool\src\test\resources\template.yaml` for template example.

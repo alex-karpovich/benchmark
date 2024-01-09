@@ -93,6 +93,7 @@ class WorkloadGenerator {
         copy.consumerPerSubscription = workload.consumerPerSubscription;
         copy.producerRate = workload.producerRate;
         copy.useRandomizedPayloads = workload.useRandomizedPayloads;
+        copy.backlogOnly = workload.backlogOnly;
         copy.name = nameFormat.from(copy);
         return copy;
     }

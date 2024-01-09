@@ -59,15 +59,19 @@ public class WorkloadGenerationTool {
         }
 
         // Dump configuration variables
-        log.info("Starting benchmark with config: {}", mapper.writeValueAsString(arguments));
+        log.info("Starting benchmark generator with config: {}", mapper.writeValueAsString(arguments));
 
+        generateWorkloadsFromTemplate(arguments.templateFile, arguments.outputFolder);
+    }
+
+    static void generateWorkloadsFromTemplate(File templateFile, File outputFolder) throws IOException {
         WorkloadSetTemplate template =
-                mapper.readValue(arguments.templateFile, WorkloadSetTemplate.class);
+                mapper.readValue(templateFile, WorkloadSetTemplate.class);
         List<Workload> workloads = new WorkloadGenerator(template).generate();
         for (Workload w : workloads) {
             File outputFile = null;
             try {
-                outputFile = new File(arguments.outputFolder, w.name + ".yaml");
+                outputFile = new File(outputFolder, w.name + ".yaml");
                 mapper.writeValue(outputFile, w);
             } catch (IOException e) {
                 log.error("Could not write file: {}", outputFile, e);

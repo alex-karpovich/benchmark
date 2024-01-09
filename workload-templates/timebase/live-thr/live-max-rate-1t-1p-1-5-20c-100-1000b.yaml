@@ -12,19 +12,24 @@
 # limitations under the License.
 #
 
-name: TB Throughput 1p 20c 100b
+nameFormat: "live-max-rate-${topics}t-1p-${consumerPerSubscription}c-${messageSize}b"
 
-topics: 1
-partitionsPerTopic: 1
+messageSize: [100, 1000]
 
-messageSize: 100
+# Max
+producerRate: [100000000]
 
-subscriptionsPerTopic: 1
-consumerPerSubscription: 10
-producersPerTopic: 1
+topics: [1]
+partitionsPerTopic: [1]
 
-# Discover max-sustainable rate
-producerRate: 10000000
+subscriptionsPerTopic: [1]
+consumerPerSubscription: [1, 5, 10]
+producersPerTopic: [1]
 
-consumerBacklogSizeGB: 0
+warmupDurationMinutes: 1
 testDurationMinutes: 5
+
+
+useRandomizedPayloads: true
+randomizedPayloadPoolSize: 1000
+randomBytesRatio: 0.5

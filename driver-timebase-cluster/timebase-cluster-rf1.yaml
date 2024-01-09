@@ -12,18 +12,13 @@
 # limitations under the License.
 #
 
-name: TB Latency 10k/s 1p 1c 1kb
 
-topics: 1
-partitionsPerTopic: 1
+name: TimeBaseCluster
+driverClass: io.openmessaging.benchmark.driver.tbcluster.TimeBaseDriver
 
-messageSize: 1024
+# Timebase client-specific configuration
+replicationFactor: 1
 
-subscriptionsPerTopic: 1
-consumerPerSubscription: 1
-producersPerTopic: 1
+connectionUrl: dxctick://localhost:18011|localhost:18012|localhost:18013
 
-producerRate: 10000
-
-consumerBacklogSizeGB: 0
-testDurationMinutes: 5
+raw: true

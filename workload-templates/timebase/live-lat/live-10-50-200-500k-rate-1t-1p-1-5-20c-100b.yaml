@@ -12,18 +12,24 @@
 # limitations under the License.
 #
 
-name: TB Latency 50k/s 1p 1c 1kb
+nameFormat: "live-max-rate-${topics}t-1p-${consumerPerSubscription}c-${messageSize}b"
 
-topics: 1
-partitionsPerTopic: 1
+messageSize: [100]
 
-messageSize: 1024
+# Max
+producerRate: [10000, 50000, 200000, 500000]
 
-subscriptionsPerTopic: 1
-consumerPerSubscription: 1
-producersPerTopic: 1
+topics: [1]
+partitionsPerTopic: [1]
 
-producerRate: 50000
+subscriptionsPerTopic: [1]
+consumerPerSubscription: [1, 5, 20]
+producersPerTopic: [1]
 
-consumerBacklogSizeGB: 0
+warmupDurationMinutes: 1
 testDurationMinutes: 5
+
+
+useRandomizedPayloads: true
+randomizedPayloadPoolSize: 1000
+randomBytesRatio: 0.5

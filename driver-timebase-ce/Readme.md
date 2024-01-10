@@ -1,5 +1,12 @@
 # Timebase CE driver for OpenMessaging framework
 
+## Building
+
+To include this driver into "benchmark-framework" build it with "timebase-ce" profile:
+```bash
+mvn clean install -P timebase-ce
+```
+
 ## Testing environment deployment
 
 The deployment consists of two steps:

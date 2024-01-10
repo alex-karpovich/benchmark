@@ -1,5 +1,12 @@
 # Timebase driver for OpenMessaging framework
 
+## Building
+
+To include this driver into "benchmark-framework" build it with "timebase-cluster" profile:
+```bash
+mvn clean install -P timebase-cluster
+```
+
 ## Testing environment deployment
 
 The deployment consists of two steps:

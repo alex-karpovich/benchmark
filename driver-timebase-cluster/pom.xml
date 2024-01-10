@@ -46,6 +46,11 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.epam.deltix</groupId>
+            <artifactId>gflog-slf4j</artifactId>
+            <version>3.0.3</version>
+        </dependency>
+        <dependency>
             <groupId>com.github.spotbugs</groupId>
             <artifactId>spotbugs-annotations</artifactId>
         </dependency>
@@ -58,11 +63,6 @@
             <groupId>deltix.qsrv.timebase</groupId>
             <artifactId>deltix-timebase-client</artifactId>
             <version>${timebase.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.epam.deltix</groupId>
-            <artifactId>gflog-slf4j</artifactId>
-            <version>3.0.3</version>
         </dependency>
     </dependencies>
 

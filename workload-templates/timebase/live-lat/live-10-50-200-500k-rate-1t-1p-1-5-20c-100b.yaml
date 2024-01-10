@@ -12,7 +12,7 @@
 # limitations under the License.
 #
 
-nameFormat: "live-max-rate-${topics}t-1p-${consumerPerSubscription}c-${messageSize}b"
+nameFormat: "live-${producerRate}r-${topics}t-1p-${consumerPerSubscription}c-${messageSize}b"
 
 messageSize: [100]
 

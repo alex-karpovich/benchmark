@@ -1,4 +1,4 @@
-name: "live-max-rate-1t-1p-50c-100b"
+name: "live-200kr-1t-1p-50c-100b"
 topics: 1
 partitionsPerTopic: 1
 keyDistributor: "NO_KEY"
@@ -10,7 +10,7 @@ payloadFile: null
 subscriptionsPerTopic: 1
 producersPerTopic: 1
 consumerPerSubscription: 50
-producerRate: 500000
+producerRate: 200000
 consumerBacklogSizeGB: 0
 backlogDrainRatio: 1.0
 backlogOnly: false

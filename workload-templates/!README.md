@@ -1,5 +1,7 @@
 # Batch generator
+
 Run Batch Workload Generator to generate workloads for all templates in `workload-templates` folder.
+
 ```bash
 mvn -pl tool exec:java@generate-workloads
 ```

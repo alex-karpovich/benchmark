@@ -23,7 +23,9 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import io.openmessaging.benchmark.Workload;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
@@ -35,6 +37,8 @@ public class WorkloadGenerationTool {
             new ObjectMapper(
                             new YAMLFactory().configure(YAMLGenerator.Feature.WRITE_DOC_START_MARKER, false))
                     .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+    private static final String ADDED_HEADER = "# This file is auto-generated. Do not edit.\n";
 
     static {
         mapper.enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE);
@@ -64,15 +68,19 @@ public class WorkloadGenerationTool {
         generateWorkloadsFromTemplate(arguments.templateFile, arguments.outputFolder);
     }
 
-    static void generateWorkloadsFromTemplate(File templateFile, File outputFolder) throws IOException {
-        WorkloadSetTemplate template =
-                mapper.readValue(templateFile, WorkloadSetTemplate.class);
+    static void generateWorkloadsFromTemplate(File templateFile, File outputFolder)
+            throws IOException {
+        WorkloadSetTemplate template = mapper.readValue(templateFile, WorkloadSetTemplate.class);
         List<Workload> workloads = new WorkloadGenerator(template).generate();
+        byte[] generatedHeader = ADDED_HEADER.getBytes(StandardCharsets.US_ASCII);
         for (Workload w : workloads) {
             File outputFile = null;
             try {
                 outputFile = new File(outputFolder, w.name + ".yaml");
-                mapper.writeValue(outputFile, w);
+                try (FileOutputStream outputStream = new FileOutputStream(outputFile)) {
+                    outputStream.write(generatedHeader);
+                    mapper.writeValue(outputStream, w);
+                }
             } catch (IOException e) {
                 log.error("Could not write file: {}", outputFile, e);
             }

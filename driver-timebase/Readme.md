@@ -54,8 +54,8 @@ terraform destroy --auto-approve
 
 ## Testing environment usage
 
-Testing environment for Timebase consists of 4 nodes:
-- 3 server nodes for Timebase cluster
+Testing environment for Timebase consists of 2 nodes:
+- 1 server node for Timebase cluster
 - 1 client node for test execution
 
 To run the test, login to deployed client node (its IP address will be shown at the end of Ansible playbook's execution) and run the commands below:

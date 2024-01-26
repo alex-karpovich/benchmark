@@ -17,6 +17,7 @@
 import sys
 import json
 import pygal
+import os
 from itertools import chain
 
 
@@ -119,4 +120,8 @@ def create_quantile_chart(workload, title, y_label, time_series):
 
 
 if __name__ == '__main__':
-    create_charts(sys.argv[1:])
+    paths = sys.argv[1:]
+    # If only one path is given and it is a directory, use all JSON files in it
+    if len(paths) == 1 and os.path.isdir(paths[0]):
+         paths = [os.path.join(paths[0], f) for f in os.listdir(paths[0]) if f.endswith('.json')]
+    create_charts(paths)

@@ -16,7 +16,7 @@ nameFormat: "historic-max-rate-${topics}t-1p-${consumerPerSubscription}c-100b"
 
 messageSize: [100]
 backlogOnly: true
-consumerBacklogSizeGB: 2
+consumerBacklogSizeGB: 30
 backlogDrainRatio: 0.95
 
 # Max

@@ -12,7 +12,7 @@ subscriptionsPerTopic: 1
 producersPerTopic: 1
 consumerPerSubscription: 1
 producerRate: 100000000
-consumerBacklogSizeGB: 2
+consumerBacklogSizeGB: 30
 backlogDrainRatio: 1.0
 backlogOnly: true
 testDurationMinutes: 5

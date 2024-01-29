@@ -31,14 +31,10 @@ terraform apply --auto-approve
 
 3. Configure software provisioning with Ansible by setting up environment variables from the table below:
 
-|        Variable         |                    Description                     |
-|-------------------------|----------------------------------------------------|
-| TESTING_REGISTRY_URL    | URL of Docker registry, containing Timebase images |
-| TESTING_REGISTRY_USER   | Username to access the registry                    |
-| TESTING_REGISTRY_PASS   | Password to access the registry                    |
-| TESTING_TIMEBASE_IMAGE  | Full image name for Timebase                       |
-| TESTING_TIMEBASE_TAG    | Timebase image tag                                 |
-| TESTING_TIMEBASE_SERIAL | Timebase serial number                             |
+|        Variable        |         Description          |
+|------------------------|------------------------------|
+| TESTING_TIMEBASE_IMAGE | Full image name for Timebase |
+| TESTING_TIMEBASE_TAG   | Timebase image tag           |
 
 4. Provision testing software with Ansible:
 

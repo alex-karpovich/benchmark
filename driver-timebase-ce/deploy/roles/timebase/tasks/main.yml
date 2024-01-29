@@ -36,12 +36,6 @@
     state: directory
     recurse: true
 
-- name: Login to Deltix registry
-  docker_login:
-    registry: "{{ deltix_registry_url }}"
-    username: "{{ deltix_registry_user }}"
-    password: "{{ deltix_registry_pass }}"
-
 - name: Run Docker compose
   docker_compose:
     project_src: "{{ timebase_dir }}"

@@ -54,7 +54,7 @@
 
 - name: Configure Timebase driver
   lineinfile:
-      dest: '/opt/benchmark/driver-timebase/timebase-cluster.yaml'
+      dest: '/opt/benchmark/driver-timebase-cluster/timebase-cluster.yaml'
       regexp: '^connectionUrl'
       line: "connectionUrl: dxctick://{{ tb_hosts }}"
 

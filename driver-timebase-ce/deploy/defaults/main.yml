@@ -19,13 +19,9 @@ deltix_uid: 1666
 deltix_gid: 1666
 
 # Containers settings
-deltix_registry_url: "{{ lookup('env','TESTING_REGISTRY_URL') | default('changeme', true)}}"
-deltix_registry_user: "{{ lookup('env','TESTING_REGISTRY_USER') | default('changeme', true)}}"
-deltix_registry_pass: "{{ lookup('env','TESTING_REGISTRY_PASS') | default('changeme', true)}}"
 
 timebase_image: "{{ lookup('env','TESTING_TIMEBASE_IMAGE') | default('changeme', true)}}"
 timebase_tag: "{{ lookup('env','TESTING_TIMEBASE_TAG') | default('changeme', true)}}"
-timebase_serial: "{{ lookup('env','TESTING_TIMEBASE_SERIAL') | default('changeme', true)}}"
 
 # Misc
 

@@ -15,7 +15,7 @@
 version: "3"
 services:
   timebase:
-    image: "{{ timebase_image }}:{{ timebase_tag }}"
+    image: "{{ deltix_registry_url }}/{{ timebase_image }}:{{ timebase_tag }}"
     stop_grace_period: 5m
     ulimits:
       nofile:

@@ -54,7 +54,7 @@
 
 - name: Configure Timebase driver
   lineinfile:
-      dest: '/opt/benchmark/driver-timebase/timebase-ce.yaml'
+      dest: '/opt/benchmark/driver-timebase-ce/timebase-ce.yaml'
       regexp: '^connectionUrl'
       line: "connectionUrl: dxtick://{{ tb_hosts }}"
 

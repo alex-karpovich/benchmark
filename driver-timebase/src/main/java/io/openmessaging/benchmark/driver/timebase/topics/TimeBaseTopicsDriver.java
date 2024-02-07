@@ -1,0 +1,229 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package io.openmessaging.benchmark.driver.timebase.topics;
+
+import static deltix.qsrv.hf.pub.ChannelPerformance.LOW_LATENCY;
+
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import deltix.data.stream.MessageChannel;
+import deltix.qsrv.hf.pub.ChannelPerformance;
+import deltix.qsrv.hf.pub.InstrumentMessage;
+import deltix.qsrv.hf.pub.md.Introspector;
+import deltix.qsrv.hf.pub.md.RecordClassDescriptor;
+import deltix.qsrv.hf.spi.conn.DisconnectEventListener;
+import deltix.qsrv.hf.spi.conn.Disconnectable;
+import deltix.qsrv.hf.tickdb.pub.DXTickDB;
+import deltix.qsrv.hf.tickdb.pub.TickDBFactory;
+import deltix.qsrv.hf.tickdb.pub.topic.ConsumerPreferences;
+import deltix.qsrv.hf.tickdb.pub.topic.MessagePoller;
+import deltix.qsrv.hf.tickdb.pub.topic.PublisherPreferences;
+import deltix.qsrv.hf.tickdb.pub.topic.TopicDB;
+import deltix.util.lang.StringUtils;
+import deltix.util.lang.Util;
+import io.openmessaging.benchmark.driver.BenchmarkConsumer;
+import io.openmessaging.benchmark.driver.BenchmarkDriver;
+import io.openmessaging.benchmark.driver.BenchmarkProducer;
+import io.openmessaging.benchmark.driver.ConsumerCallback;
+import io.openmessaging.benchmark.driver.timebase.BinaryPayloadMessage;
+import io.openmessaging.benchmark.driver.timebase.TimeBaseConfig;
+import io.openmessaging.benchmark.driver.timebase.TimeBaseProducer;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import org.apache.bookkeeper.stats.StatsLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+@SuppressWarnings("unused")
+public class TimeBaseTopicsDriver implements BenchmarkDriver {
+
+    private static final String PARTITION_PREFIX = "p_";
+
+    private static final ChannelPerformance CHANNEL_PERFORMANCE = LOW_LATENCY;
+
+    private DXTickDB client;
+    private TimeBaseConfig config;
+    private final Map<String, ProducerSupplier> topicToProducer = new ConcurrentHashMap<>();
+    private final Map<String, CompletableFuture<BenchmarkConsumer>> subscriptionToConsumer =
+            new ConcurrentHashMap<>();
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TimeBaseTopicsDriver.class);
+
+    private static final ObjectMapper mapper =
+            new ObjectMapper(new YAMLFactory())
+                    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+    private static final RecordClassDescriptor messageDescriptor =
+            getBinaryPayloadMessageDescriptor();
+
+    private class ProducerSupplier {
+        private final int partitionCount;
+        private int producerCount = 0;
+
+        ProducerSupplier(int partitionCount) {
+            this.partitionCount = partitionCount;
+        }
+
+        public synchronized CompletableFuture<BenchmarkProducer> create(String topic) {
+            if (producerCount >= partitionCount) {
+                throw new IllegalStateException("Too many producers!");
+            }
+            producerCount++;
+            String partitionKey = PARTITION_PREFIX + producerCount;
+            return createProducer(topic, partitionKey);
+        }
+    }
+
+    private static class EventListener implements DisconnectEventListener {
+        DXTickDB db;
+
+        EventListener(DXTickDB db) {
+            this.db = db;
+        }
+
+        @Override
+        public void onDisconnected() {
+            if (db instanceof Disconnectable) {
+                ((Disconnectable) db).removeDisconnectEventListener(this);
+            }
+            Util.close(db);
+            LOGGER.info("Disconnected event received");
+        }
+
+        @Override
+        public void onReconnected() {
+            LOGGER.info("Reconnected event received");
+        }
+    }
+
+    @Override
+    public void initialize(File configurationFile, StatsLogger statsLogger) throws IOException {
+        config = mapper.readValue(configurationFile, TimeBaseConfig.class);
+
+        if (client != null) {
+            client.close();
+        }
+    }
+
+    private synchronized DXTickDB getOrCreate() {
+        String pass;
+        if (StringUtils.isEmpty(config.password)) {
+            pass = null;
+        } else {
+            pass =
+                    new String(
+                            Base64.getDecoder().decode(config.password.getBytes(StandardCharsets.UTF_8)),
+                            StandardCharsets.UTF_8);
+        }
+        String userName = config.user;
+
+        if (client == null || isNotConnected(client)) {
+            Util.close(this.client);
+            client =
+                    !StringUtils.isEmpty(userName)
+                            ? TickDBFactory.createFromUrl(config.connectionUrl, userName, pass)
+                            : TickDBFactory.createFromUrl(config.connectionUrl);
+
+            TickDBFactory.setApplicationName(client, "Benchmark Test");
+            LOGGER.info("Opening connection to TimeBase on " + config.connectionUrl);
+            client.open(false);
+
+            if (client instanceof Disconnectable) {
+                ((Disconnectable) client).addDisconnectEventListener(new EventListener(client));
+                LOGGER.info("Subscribe to disconnect event");
+            }
+        }
+        return client;
+    }
+
+    private boolean isNotConnected(DXTickDB db) {
+        return !((Disconnectable) db).isConnected();
+    }
+
+    @Override
+    public CompletableFuture<Void> createTopic(final String topic, int partitions) {
+        return CompletableFuture.runAsync(
+                () -> {
+                    getTopicDB().createTopic(topic, new RecordClassDescriptor[] {messageDescriptor}, null);
+                    topicToProducer.put(topic, new ProducerSupplier(partitions));
+                });
+    }
+
+    private static RecordClassDescriptor getBinaryPayloadMessageDescriptor() {
+        Introspector ix = Introspector.createEmptyMessageIntrospector();
+        try {
+            return ix.introspectRecordClass("Get test RD", BinaryPayloadMessage.class);
+        } catch (Introspector.IntrospectionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public CompletableFuture<BenchmarkProducer> createProducer(String topic) {
+        ProducerSupplier producerSupplier = topicToProducer.get(topic);
+        if (producerSupplier == null) {
+            throw new IllegalArgumentException("Unknown topic: " + topic);
+        }
+        return producerSupplier.create(topic);
+    }
+
+    private CompletableFuture<BenchmarkProducer> createProducer(
+            String topicKey, String partitionKey) {
+        PublisherPreferences loadingOptions = new PublisherPreferences().setRaw(config.raw);
+        loadingOptions.channelPerformance = CHANNEL_PERFORMANCE;
+        MessageChannel<InstrumentMessage> topicPublisher =
+                getTopicDB().createPublisher(topicKey, loadingOptions, null);
+        LOGGER.info("Producer for topic {} with partition {} created", topicKey, partitionKey);
+        TimeBaseProducer producer = new TimeBaseProducer(topicPublisher, config.raw, messageDescriptor);
+        return CompletableFuture.completedFuture(producer);
+    }
+
+    private TopicDB getTopicDB() {
+        return getOrCreate().getTopicDB();
+    }
+
+    @Override
+    public CompletableFuture<BenchmarkConsumer> createConsumer(
+            String topic, String subscriptionName, ConsumerCallback consumerCallback) {
+        return subscriptionToConsumer.computeIfAbsent(
+                subscriptionName,
+                (key) -> {
+                    LOGGER.info("Consumer for topic {} with subscription {} created", topic, key);
+                    ConsumerPreferences consumerPreferences = new ConsumerPreferences().setRaw(config.raw);
+                    MessagePoller pollingConsumer =
+                            getTopicDB().createPollingConsumer(topic, consumerPreferences);
+                    TimeBaseTopicConsumer timeBaseConsumer =
+                            new TimeBaseTopicConsumer(pollingConsumer, consumerCallback, config.raw);
+                    return CompletableFuture.completedFuture(timeBaseConsumer);
+                });
+    }
+
+    @Override
+    public void close() throws Exception {
+        if (client != null) {
+            client.close();
+        }
+    }
+
+    @Override
+    public String getTopicNamePrefix() {
+        return "test-topic";
+    }
+}

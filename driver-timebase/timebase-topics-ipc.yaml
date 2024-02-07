@@ -14,7 +14,7 @@
 
 
 name: TimeBase
-driverClass: io.openmessaging.benchmark.driver.timebase.TimeBaseDriver
+driverClass: io.openmessaging.benchmark.driver.timebase.topics.TimeBaseTopicsDriver
 
 # Timebase client-specific configuration
 connectionUrl: dxtick://localhost:8011

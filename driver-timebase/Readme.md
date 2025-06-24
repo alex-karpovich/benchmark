@@ -65,6 +65,11 @@ cd /opt/benchmark
 sudo bin/benchmark --drivers driver-timebase/timebase.yaml workloads/1-topic-16-partition-256b.yaml
 ```
 
+Note: if you want to benchmark TimeBase "topics", use `driver-timebase/timebase-topics-ipc.yaml` driver config:
+```bash
+sudo bin/benchmark --drivers driver-timebase/timebase-topics-ipc.yaml workloads/1-topic-16-partition-256b.yaml
+````
+
 When the test will finish, a JSON file with results will be stored within _/opt/benchmark_ directory. Use the following command to retrieve this file to your local machine:
 
 ```bash

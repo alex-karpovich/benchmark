@@ -17,8 +17,6 @@ name: TimeBase
 driverClass: io.openmessaging.benchmark.driver.timebase.TimeBaseDriver
 
 # Timebase client-specific configuration
-replicationFactor: 2
-
 connectionUrl: dxtick://localhost:8011
 
 raw: true

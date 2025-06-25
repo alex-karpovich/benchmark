@@ -1,11 +1,19 @@
-provider "aws" {
-  region  = "${var.region}"
-  version = "3.50"
+terraform {
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+      version = "6.0.0"
+    }
+    random = {
+      version = "3.1"
+    }
+  }
 }
 
-provider "random" {
-  version = "3.1"
+provider "aws" {
+  region  = var.region
 }
+
 
 variable "public_key_path" {
   description = <<DESCRIPTION
@@ -51,27 +59,27 @@ resource "aws_vpc" "benchmark_vpc" {
 
 # Create an internet gateway to give our subnet access to the outside world
 resource "aws_internet_gateway" "timebase" {
-  vpc_id = "${aws_vpc.benchmark_vpc.id}"
+  vpc_id = aws_vpc.benchmark_vpc.id
 }
 
 # Grant the VPC internet access on its main route table
 resource "aws_route" "internet_access" {
-  route_table_id         = "${aws_vpc.benchmark_vpc.main_route_table_id}"
+  route_table_id         = aws_vpc.benchmark_vpc.main_route_table_id
   destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = "${aws_internet_gateway.timebase.id}"
+  gateway_id             = aws_internet_gateway.timebase.id
 }
 
 # Create a subnet to launch our instances into
 resource "aws_subnet" "benchmark_subnet" {
-  vpc_id                  = "${aws_vpc.benchmark_vpc.id}"
+  vpc_id                  = aws_vpc.benchmark_vpc.id
   cidr_block              = "10.0.0.0/24"
   map_public_ip_on_launch = true
-  availability_zone       = "${var.az}"
+  availability_zone       = var.az
 }
 
 resource "aws_security_group" "benchmark_security_group" {
   name   = "terraform-timebase-${random_id.hash.hex}"
-  vpc_id = "${aws_vpc.benchmark_vpc.id}"
+  vpc_id = aws_vpc.benchmark_vpc.id
 
   # SSH access from anywhere
   ingress {
@@ -104,16 +112,16 @@ resource "aws_security_group" "benchmark_security_group" {
 
 resource "aws_key_pair" "auth" {
   key_name   = "${var.key_name}-${random_id.hash.hex}"
-  public_key = "${file(var.public_key_path)}"
+  public_key = file(var.public_key_path)
 }
 
 resource "aws_instance" "timebase" {
-  ami                    = "${var.ami}"
-  instance_type          = "${var.instance_types["timebase"]}"
-  key_name               = "${aws_key_pair.auth.id}"
-  subnet_id              = "${aws_subnet.benchmark_subnet.id}"
+  ami                    = var.ami
+  instance_type          = var.instance_types["timebase"]
+  key_name               = aws_key_pair.auth.id
+  subnet_id              = aws_subnet.benchmark_subnet.id
   vpc_security_group_ids = ["${aws_security_group.benchmark_security_group.id}"]
-  count                  = "${var.num_instances["timebase"]}"
+  count                  = var.num_instances["timebase"]
 
   tags = {
     Name      = "timebase_${count.index}"
@@ -122,12 +130,12 @@ resource "aws_instance" "timebase" {
 }
 
 resource "aws_instance" "client" {
-  ami                    = "${var.ami}"
-  instance_type          = "${var.instance_types["client"]}"
-  key_name               = "${aws_key_pair.auth.id}"
-  subnet_id              = "${aws_subnet.benchmark_subnet.id}"
+  ami                    = var.ami
+  instance_type          = var.instance_types["client"]
+  key_name               = aws_key_pair.auth.id
+  subnet_id              = aws_subnet.benchmark_subnet.id
   vpc_security_group_ids = ["${aws_security_group.benchmark_security_group.id}"]
-  count                  = "${var.num_instances["client"]}"
+  count                  = var.num_instances["client"]
 
   tags = {
     Name      = "timebase_client_${count.index}"
@@ -147,9 +155,9 @@ resource "local_file" "hosts_cfg" {
 }
 
 output "timebase_ssh_host" {
-  value = "${aws_instance.timebase.0.public_ip}"
+  value = aws_instance.timebase.0.public_ip
 }
 
 output "client_ssh_host" {
-  value = "${aws_instance.client.0.public_ip}"
+  value = aws_instance.client.0.public_ip
 }

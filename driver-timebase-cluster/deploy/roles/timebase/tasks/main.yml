@@ -43,7 +43,7 @@
     password: "{{ deltix_registry_pass }}"
 
 - name: Run Docker compose
-  docker_compose:
+  community.docker.docker_compose_v2:
     project_src: "{{ timebase_dir }}"
-    pull: true
+    pull: missing
     recreate: always

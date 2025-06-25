@@ -13,10 +13,11 @@
 # limitations under the License.
 #
 
-- name: Install tuned package
-  command: "yum install -y tuned"
-  args:
-      creates: /usr/sbin/tuned
+- name: Install tuned (Amazon Linux 2023)
+  dnf:
+    name: 'https://kojipkgs.fedoraproject.org//packages/tuned/2.18.0/2.fc34/noarch/tuned-2.18.0-2.fc34.noarch.rpm'
+    state: installed
+    disable_gpg_check: true
 
 - name: Start and enable tuned service
   systemd:
